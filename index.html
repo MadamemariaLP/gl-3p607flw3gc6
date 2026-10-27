@@ -77,6 +77,7 @@ h1,h2,h3,.pirate{font-family:"Pirata One",Georgia,serif;font-weight:400;letter-s
 .opts{display:grid;gap:10px;grid-template-columns:1fr 1fr}
 .opts.one{grid-template-columns:1fr}
 .opt{font:inherit;font-size:19px;font-weight:800;background:#fff;border:3px solid #d9c18a;border-radius:14px;padding:13px 10px;cursor:pointer;color:var(--ink);min-height:56px}
+.opt.sel{border-color:var(--sea1);background:#dff2ff;box-shadow:0 0 0 3px #9fd3ff}
 .opt.ok{background:#d6f5e2;border-color:var(--green);color:#16683b}
 .opt.ko{background:#ffe0e3;border-color:var(--red);color:#9b1020}
 .feedback{font-weight:900;font-size:20px;margin-top:10px;min-height:28px;text-align:center}
@@ -878,7 +879,7 @@ function nextQ(){
   if (q.t === "order"){ let w; do { w = shuffle(q.w); } while (w.join() === q.w.join()); G.opts = w; }
   else G.opts = (G.id === "mat" || q.o.length > 4) ? shuffle(q.o) : q.o.slice();
   G.seen.push(q); if (G.seen.length > 12) G.seen.shift();
-  G.locked = false;
+  G.locked = false; G.sel = null;
 }
 function renderGame(){
   const s = SUBJ[G.id], q = G.q;
@@ -898,7 +899,12 @@ function renderGame(){
   const body = q.t === "order"
     ? `<div class="chips">${G.opts.map((w,k) => `<button class="wchip ${G.built.includes(k)?"used":""}" onclick="tapWord(${k})">${esc(w)}</button>`).join("")}</div>
        <div class="slots" id="slots">${G.built.length ? G.built.map((k,n) => `<span class="slot" onclick="untap(${n})">${esc(G.opts[k])}</span>`).join("") : `<span class="hint">Toca las palabras en orden…</span>`}</div>`
-    : `<div class="opts ${long?"one":""}">${G.opts.map((o,k) => `<button class="opt" onclick="answer(${k})">${esc(o)}</button>`).join("")}</div>`;
+    : `<div class="opts ${long?"one":""}">${G.opts.map((o,k) => `<button class="opt ${G.sel===k?"sel":""}" onclick="choose(${k})">${esc(o)}</button>`).join("")}</div>`;
+  // En contrarreloj se responde al momento; en el resto se elige y se pulsa Comprobar (se puede cambiar antes)
+  const ready = q.t === "order" ? G.built.length === G.opts.length : G.sel != null;
+  const check = G.mode === "crono" ? "" : `<div class="row" style="justify-content:center;margin-top:14px">
+      ${q.t === "order" ? `<button class="btn ghost" ${G.built.length?"":"disabled"} onclick="clearWords()">↩ Borrar</button>` : ""}
+      <button class="btn green" id="checkBtn" ${ready?"":"disabled"} onclick="confirmAnswer()">✔ Comprobar</button></div>`;
   app.innerHTML = `
     <div class="hud" style="margin-top:4px"><button class="btn ghost" style="padding:6px 12px;font-size:15px" onclick="quitGame()">✕</button>${top}</div>
     ${SUBJ[G.id].zone === "bonus" ? `<div class="x2">💎 Mar del Tesoro: ¡berries x2!</div>` : ""}
@@ -909,6 +915,7 @@ function renderGame(){
       ${q.s ? `<div class="q-sentence">${esc(q.s)}</div>` : ""}
       ${vid}
       ${body}
+      ${check}
       <div class="feedback" id="fb"></div>
     </div>
     <div class="parrot"><div class="bird">${icon("parrot",62,62)}</div><div class="bubble" id="say">${esc(G.say || sayStart())}</div>${G.combo>=2?`<div class="combo">🔥 x${G.combo}</div>`:""}</div>`;
@@ -919,7 +926,21 @@ function wrongKey(q){ return q.q + "|" + (q.s||"") + "|" + q.a; }
 function tapWord(k){
   if (!G || G.locked || G.built.includes(k)) return;
   G.built.push(k); tone(330 + G.built.length*70, .09, {type:"sine", vol:.15}); renderGame();
-  if (G.built.length === G.opts.length) answer(-1);
+  if (G.mode === "crono" && G.built.length === G.opts.length) answer(-1);
+}
+function clearWords(){ if (!G || G.locked) return; G.built = []; renderGame(); }
+function choose(k){
+  if (!G || G.locked) return;
+  if (G.mode === "crono") return answer(k);
+  G.sel = k; tone(520, .07, {type:"sine", vol:.12});
+  app.querySelectorAll(".opt").forEach((b,j) => b.classList.toggle("sel", j === k));
+  document.getElementById("checkBtn").disabled = false;
+}
+function confirmAnswer(){
+  if (!G || G.locked) return;
+  if (G.q.t === "order"){ if (G.built.length === G.opts.length) answer(-1); }
+  else if (G.sel != null) answer(G.sel);
+  const cb = document.getElementById("checkBtn"); if (cb) cb.disabled = true;
 }
 function untap(n){ if (!G || G.locked) return; G.built.splice(n,1); renderGame(); }
 const SAY_OK = ["¡Croac! ¡Eso es!","¡Qué crack, CaptainLukiLufy!","¡Toma ya! 💥","¡Berries para el capitán!","¡Ni Zoro se pierde tan poco!","¡Eres un genio pirata!"];
@@ -1261,7 +1282,9 @@ function renderFamily(){
       <p style="margin:6px 0">Preguntas: <b>${tot}</b> · Acierto: <b>${tot?Math.round(st.ok/tot*100):0}%</b> · Errores pendientes: <b>${(S.wrong[id]||[]).length}</b></p>
       ${top ? `<div class="hint">Lo que más falla:</div><ul style="margin:4px 0 0;padding-left:20px">${top}</ul>` : ""}</div>`;
   }).join("");
-  const exams = EXAMS.map(e => { const x = S.exams[e.key]; return `<li>${esc(e.name)}: ${x ? (x.nota != null ? "nota " + x.nota.toFixed(1).replace(".",",") : "terminado") : "sin hacer"}</li>`; }).join("");
+  const exams = EXAMS.map((e,k) => { const x = S.exams[e.key], d = examData(e), started = d && d.answers && d.answers.some(a => a != null);
+    const st = x ? (x.nota != null ? "nota " + x.nota.toFixed(1).replace(".",",") : "terminado") : started ? "a medias" : "sin hacer";
+    return `<li style="margin:6px 0">${esc(e.name)}: <b>${st}</b> ${x || started ? `<button class="btn ghost" style="font-size:13px;padding:4px 10px;margin-left:6px" onclick="resetExam(${k})">🗑️ Borrar intento</button>` : ""}</li>`; }).join("");
   app.innerHTML = `${hud()}
     <div class="card"><h2 style="margin:0;font-size:30px">👪 Familia</h2>
       <p style="margin:6px 0">Partidas: <b>${S.games}</b> · Aciertos totales: <b>${S.totalOk}</b> · Racha: <b>${S.streak.days} días</b></p>
@@ -1281,6 +1304,12 @@ function renderFamily(){
         <span>${p.e} ${esc(p.n)} <small style="color:${RARITY[p.r].c}">${RARITY[p.r].n}</small></span>
         <input type="checkbox" style="width:24px;height:24px" ${S.prizeOff.includes(p.id)?"":"checked"} onchange="togglePrize(${k})"></label>`).join("")}
     </div>${subj}`;
+}
+function resetExam(k){
+  const e = EXAMS[k];
+  if (!confirm(`¿Borrar el intento de «${e.name}»? Podrá hacerlo otra vez desde cero (los premios ya ganados se quedan).`)) return;
+  try { localStorage.removeItem(e.key); } catch(x){}
+  delete S.exams[e.key]; save(); render();
 }
 function togglePrize(k){ const id = PRIZES[k].id, i = S.prizeOff.indexOf(id); i >= 0 ? S.prizeOff.splice(i,1) : S.prizeOff.push(id); save(); }
 
