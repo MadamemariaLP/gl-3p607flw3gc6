@@ -172,6 +172,19 @@ h1,h2,h3,.pirate{font-family:"Pirata One",Georgia,serif;font-weight:400;letter-s
 @keyframes flagw{50%{transform:scaleX(.8)}}
 .shake{animation:shake .4s}
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.prize{background:#fff;border:4px solid var(--rc);border-radius:18px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:16px;box-shadow:0 0 0 4px color-mix(in srgb,var(--rc) 25%,transparent);animation:pop .5s}
+.prize .pe{font-size:56px;line-height:1}
+.prize .rar{font-size:12px;font-weight:900;color:#fff;background:var(--rc);border-radius:999px;padding:2px 10px}
+.prize.r3{background:linear-gradient(160deg,#fff7d1,#ffe28a);animation:pop .5s,glow 1.4s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 0 22px 6px #f5b700}}
+.choose{display:grid;gap:10px}
+.choose .prize{cursor:pointer}
+.choose .prize:active{transform:scale(.95)}
+.catalog{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:55vh;overflow:auto}
+.catalog .prize{font-size:13px}.catalog .prize .pe{font-size:36px}
+.chestwrap{cursor:pointer;display:inline-block;margin:8px 0;animation:bob 1.6s ease-in-out infinite}
+.shakebig{animation:shakebig .25s infinite}
+@keyframes shakebig{25%{transform:rotate(-8deg) scale(1.05)}75%{transform:rotate(8deg) scale(1.1)}}
 @media (max-width:420px){.opt{font-size:17px}.q-sentence{font-size:19px}#fx .cap{font-size:36px}}
 @media (prefers-reduced-motion:reduce){.bob,.fx-waves,.fx-flag{animation:none}}
 </style>
@@ -575,6 +588,23 @@ const EXAMS = [
   {key:"glds-examen-castellano-1", file:"examenes/castellano-1.html", name:"Examen Pirata de Castellano", sub:"Ficha repaso T-1"},
   {key:"glds-examen-medi-1",       file:"examenes/medi-1.html",       name:"Examen Pirata de Medi", sub:"Les plantes: l'agricultura"},
 ];
+// Premios reales (los canjean papá o mamá con el código). r: 1 común · 2 raro · 3 épico
+const PRIZES = [
+  {id:"capitulo", e:"🎬", n:"1 capítulo de One Piece",          r:1},
+  {id:"chuches",  e:"🍬", n:"Bolsa de chuches",                 r:1},
+  {id:"helado",   e:"🍦", n:"Un helado",                        r:1},
+  {id:"euro1",    e:"🪙", n:"1 € para la hucha",                r:1},
+  {id:"tarde",    e:"🌙", n:"Acostarte 15 min más tarde",       r:1},
+  {id:"cromos",   e:"⚽", n:"Un sobre de cromos de fútbol",     r:2},
+  {id:"euro2",    e:"💶", n:"2 € para la hucha",                r:2},
+  {id:"peli",     e:"🍿", n:"Elegir la peli del finde",         r:2},
+  {id:"pantalla", e:"🎮", n:"30 min extra de consola o tablet", r:2},
+  {id:"maquinas", e:"🕹️", n:"Ir a las maquinitas",              r:3},
+  {id:"chatarra", e:"🍔", n:"Comida chatarra: hamburguesa o pizza", r:3},
+  {id:"euro5",    e:"💰", n:"5 € para la hucha",                r:3},
+];
+const RARITY = {1:{n:"Común", c:"#2f86d9"}, 2:{n:"Raro", c:"#8e44ad"}, 3:{n:"¡ÉPICO!", c:"#e0a100"}};
+const STREAK_GOALS = [3,5,7,10,14,21,30];   // días seguidos en los que elige premio
 const FAMILY_PIN = "2026";
 const PIECES_PER_TICKET = 4;
 
@@ -583,10 +613,18 @@ const PIECES_PER_TICKET = 4;
 // ==================================================================
 const KEY = "glds-gran-line-1";
 const blank = () => ({berries:0, games:0, totalOk:0, fixed:0, pieces:0,
-  tickets:{earned:0, redeemed:[]}, stars:{}, crono:{}, wins:{}, stats:{}, wrong:{},
+  tickets:{earned:0, redeemed:[]}, prizes:[], chests:0, choices:0, streakGot:[], prizeOff:[], stars:{}, crono:{}, wins:{}, stats:{}, wrong:{},
   stickers:[], exams:{}, streak:{last:"", days:0}, lastIsland:"cat", sound:true, music:true, rank:0});
 let S = load();
-function load(){ try { const d = JSON.parse(localStorage.getItem(KEY)); if (d) return Object.assign(blank(), d); } catch(e){} return blank(); }
+function load(){
+  try { const d = JSON.parse(localStorage.getItem(KEY));
+    if (d){ const s = Object.assign(blank(), d);
+      const old = s.tickets.earned - s.tickets.redeemed.length;
+      for (let k=0;k<old;k++) s.prizes.push({id:"capitulo", from:"Vale antiguo", date:new Date().toLocaleDateString("es-ES")});
+      s.tickets = {earned:0, redeemed:[]};
+      return s; } } catch(e){}
+  return blank();
+}
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
 
 const app = document.getElementById("app");
@@ -683,7 +721,7 @@ function render(){
 }
 function hud(){
   return `<div class="hud"><div class="title">Gran Line del Saber</div>
-    <span class="chip">💰 ${fmtB(S.berries)}</span><span class="chip">🎬 ${S.tickets.earned - S.tickets.redeemed.length}</span>
+    <span class="chip">💰 ${fmtB(S.berries)}</span><span class="chip" style="cursor:pointer" onclick="go('treasure')">🎁 ${S.prizes.filter(p => !p.used).length}</span>
     <button class="chip" style="cursor:pointer" onclick="toggleMusic()" aria-label="Música">${S.music && S.sound ? "🎵" : "🔇"}</button></div>`;
 }
 
@@ -763,7 +801,7 @@ function renderIsland(){
     </div>
     <div class="card"><b>Premios de esta isla</b>
       <p class="hint" style="margin:6px 0 0">🥉🥈🥇 medalla según las estrellas · 👑 Maestro: 3⭐ + ganar una batalla + 12 en contrarreloj.<br>
-      🧩 Ganas una pieza de mapa con 3⭐, con cada batalla ganada o con 12+ en contrarreloj. ${PIECES_PER_TICKET} piezas = 🎬 vale por un capítulo.</p>
+      🧩 Ganas una pieza de mapa con 3⭐, con cada batalla ganada o con 12+ en contrarreloj. ${PIECES_PER_TICKET} piezas = 🎁 cofre con premio sorpresa.</p>
     </div>`;
 }
 
@@ -783,7 +821,7 @@ function renderExams(){
   }).join("");
   app.innerHTML = `${hud()}
     <div class="card center"><h2 style="margin:0;font-size:34px">🏰 Isla de los Exámenes</h2>
-      <p style="margin:6px 0 0">Exámenes de verdad, sacados de tus fichas del cole.<br><b>Nota 7 o más = 🎬 vale por un capítulo</b> y muchos berries.</p></div>
+      <p style="margin:6px 0 0">Exámenes de verdad, sacados de tus fichas del cole.<br><b>Nota 7 o más = 🎁 cofre con premio sorpresa</b> y muchos berries.</p></div>
     ${rows}
     <button class="btn ghost" style="margin-top:16px" onclick="go('map')">◀ Volver al mapa</button>`;
 }
@@ -797,10 +835,10 @@ function checkExams(){
     const nota = d.total ? d.score/d.total*10 : null;
     S.exams[e.key] = {at:tag, nota};
     S.berries += d.total ? d.score * 20e6 : 100e6;
-    if (nota != null && nota >= 7){ S.tickets.earned++; unlocked.push(`🎬 ¡Vale por un capítulo por tu ${esc(e.name)} (nota ${nota.toFixed(1).replace(".",",")})!`); }
+    if (nota != null && nota >= 7){ S.chests++; S.chestFrom = `${e.name} (nota ${nota.toFixed(1).replace(".",",")})`; }
   });
-  if (unlocked.length){ save(); afterRewards(unlocked); }
-  else save();
+  save();
+  if (S.chests || S.choices) afterRewards([]);
 }
 
 // ---------------- JUEGO ----------------
@@ -957,10 +995,13 @@ function finish(){
   }
   if (G.mode === "repaso"){ good = G.ok >= G.ko; if (!(S.wrong[id]||[]).length) msgs.push("¡Chopper ha curado todos tus errores de esta isla! 🩺"); }
   if (piece){ S.pieces += piece; msgs.push("🧩 ¡Has ganado una pieza de mapa!"); }
-  while (S.pieces >= PIECES_PER_TICKET){ S.pieces -= PIECES_PER_TICKET; S.tickets.earned++; msgs.push("🎬 ¡Mapa completo! ¡VALE POR UN CAPÍTULO DE ONE PIECE!"); }
+  while (S.pieces >= PIECES_PER_TICKET){ S.pieces -= PIECES_PER_TICKET; S.chests++; S.chestFrom = "Mapa completo 🧩"; msgs.push("🎁 ¡Mapa completo! ¡Has encontrado un COFRE DEL TESORO!"); }
   S.games++;
   const t = today(), y = new Date(Date.now()-864e5).toLocaleDateString("sv");
-  if (S.streak.last !== t){ S.streak.days = S.streak.last === y ? S.streak.days + 1 : 1; S.streak.last = t; }
+  if (S.streak.last !== t){ S.streak.days = S.streak.last === y ? S.streak.days + 1 : 1; S.streak.last = t;
+    if (S.streak.days === 1) S.streakGot = [];
+    const goal = STREAK_GOALS.includes(S.streak.days) || (S.streak.days > 30 && S.streak.days % 7 === 2);
+    if (goal && !S.streakGot.includes(S.streak.days)){ S.streakGot.push(S.streak.days); S.choices++; msgs.push(`🔥 ¡Racha de ${S.streak.days} días! ¡Puedes ELEGIR un premio!`); } }
   G.msgs = msgs; G.good = good;
   save();
   screen = "end"; render(); window.scrollTo({top:0});
@@ -1008,12 +1049,69 @@ function afterRewards(extra, celebrate){
   }
   save();
   const next = () => {
+    if (!queue.length && S.choices > 0) return chooseModal(next);
+    if (!queue.length && S.chests > 0) return chestModal(next);
     const m = queue.shift();
     if (!m){ if (celebrate) playAnim(randomAnim()); return; }
     sCoins(); setTimeout(sJingle, 250); confetti();
     showModal(`<h2 style="margin:0 0 8px;font-size:30px">${m.title}</h2>${m.html}`, () => m.anim ? playAnim(m.anim, next) : next());
   };
   next();
+}
+// ---------------- PREMIOS SORPRESA ----------------
+const activePrizes = () => PRIZES.filter(p => !S.prizeOff.includes(p.id));
+function rollPrize(exclude=[]){
+  const pool = activePrizes().filter(p => !exclude.includes(p.id));
+  const list = pool.length ? pool : PRIZES;
+  // primero la rareza (común 60 %, raro 28 %, épico 12 %), luego un premio de esa rareza
+  const tiers = [1,2,3].filter(r => list.some(p => p.r === r)), w = {1:60, 2:28, 3:12};
+  let x = Math.random() * tiers.reduce((a,r) => a + w[r], 0), tier = tiers[0];
+  for (const r of tiers){ x -= w[r]; if (x <= 0){ tier = r; break; } }
+  const inTier = list.filter(p => p.r === tier);
+  return inTier[Math.floor(Math.random()*inTier.length)];
+}
+function prizeCard(p, extra=""){
+  const r = RARITY[p.r];
+  return `<div class="prize r${p.r}" style="--rc:${r.c}" ${extra}><span class="pe">${p.e}</span><b>${esc(p.n)}</b><span class="rar">${r.n}</span></div>`;
+}
+function givePrize(p, from){ S.prizes.push({id:p.id, from, date:new Date().toLocaleDateString("es-ES")}); save(); }
+function chestModal(done){
+  const root = document.getElementById("modalRoot"), from = S.chestFrom || "Cofre del tesoro";
+  root.innerHTML = `<div class="modal"><div class="card center pop"><h2 style="margin:0;font-size:32px">🎁 ¡Cofre del tesoro!</h2>
+    <p class="hint" style="margin:4px 0">${esc(from)}</p>
+    <div id="chestBox" class="chestwrap" onclick="openChest()">${icon("chest",170,138)}</div>
+    <p style="font-weight:900;font-size:20px;margin:6px 0" id="chestTxt">¡Toca el cofre para abrirlo!</p>
+    <div id="chestOk"></div></div></div>`;
+  window.openChest = () => {
+    const box = document.getElementById("chestBox"); if (box.dataset.open) return; box.dataset.open = 1;
+    box.classList.add("shakebig"); sCannon();
+    const p = rollPrize();
+    setTimeout(() => {
+      S.chests--; givePrize(p, from);
+      box.classList.remove("shakebig"); box.innerHTML = prizeCard(p, 'style="--rc:' + RARITY[p.r].c + '"');
+      document.getElementById("chestTxt").textContent = p.r === 3 ? "¡¡PREMIO ÉPICO!! 🤩" : p.r === 2 ? "¡Premio raro! 😎" : "¡Premio!";
+      sCoins(); setTimeout(sJingle, 200); confetti(); if (p.r === 3) rain(["🤩","⭐","💰"], 30);
+      document.getElementById("chestOk").innerHTML = `<p class="hint">Guardado en 🎁 Mis premios</p><button class="btn gold" id="mOk">¡Genial!</button>`;
+      document.getElementById("mOk").onclick = () => { root.innerHTML = ""; done && done(); };
+    }, 1300);
+  };
+}
+function chooseModal(done){
+  const root = document.getElementById("modalRoot"), opts = [];
+  // una común, una rara y una épica si es posible
+  [1,2,3].forEach(r => { const pool = activePrizes().filter(p => p.r === r && !opts.includes(p)); if (pool.length) opts.push(pool[Math.floor(Math.random()*pool.length)]); });
+  while (opts.length < 3) opts.push(rollPrize(opts.map(p => p.id)));
+  root.innerHTML = `<div class="modal"><div class="card center pop"><h2 style="margin:0;font-size:32px">🔥 ¡Estás en racha!</h2>
+    <p style="font-weight:900;margin:4px 0 10px">${S.streak.days} días seguidos jugando. ¡ELIGE tu premio!</p>
+    <div class="choose">${opts.map((p,k) => prizeCard(p, `onclick="pickPrize(${k})"`)).join("")}</div></div></div>`;
+  sBell(); setTimeout(sJingle, 300);
+  window.pickPrize = k => {
+    const p = opts[k]; S.choices--; givePrize(p, `Racha de ${S.streak.days} días 🔥`);
+    sCoins(); confetti();
+    root.innerHTML = `<div class="modal"><div class="card center pop"><h2 style="margin:0;font-size:30px">¡Buena elección!</h2>${prizeCard(p)}
+      <p class="hint">Guardado en 🎁 Mis premios</p><button class="btn gold" id="mOk">¡Genial!</button></div></div>`;
+    document.getElementById("mOk").onclick = () => { root.innerHTML = ""; done && done(); };
+  };
 }
 function unlockedAnims(){ return ANIMS.filter(a => a.rank <= rankIdx(S.berries)); }
 function randomAnim(){ const u = unlockedAnims(); return u[Math.floor(Math.random()*u.length)].id; }
@@ -1098,9 +1196,13 @@ function fireworks(){
 // ---------------- TESOROS ----------------
 function renderTreasure(){
   const r = rankIdx(S.berries), nx = RANKS[r+1];
-  const avail = S.tickets.earned - S.tickets.redeemed.length;
-  const tickets = Array.from({length:avail}, (_,k) => `<div class="ticket"><div class="spread"><span>🎬 VALE POR 1 CAPÍTULO<br>DE ONE PIECE</span><button class="btn" style="font-size:15px;padding:8px 12px" onclick="redeem()">Canjear</button></div></div>`).join("")
-    + S.tickets.redeemed.slice(-3).reverse().map(d => `<div class="ticket used">🎬 Vale canjeado el ${esc(d)}</div>`).join("");
+  const byId = id => PRIZES.find(p => p.id === id) || PRIZES[0];
+  const mine = S.prizes.map((x,k) => ({x,k})).filter(o => !o.x.used).reverse().map(({x,k}) => { const p = byId(x.id);
+    return `<div class="ticket" style="border-color:${RARITY[p.r].c}"><div class="spread"><span style="font-size:34px">${p.e}</span>
+      <span style="flex:1">${esc(p.n)}<br><small class="hint">${esc(x.from)} · ${esc(x.date)}</small></span>
+      <button class="btn" style="font-size:15px;padding:8px 12px" onclick="redeem(${k})">Canjear</button></div></div>`; }).join("");
+  const used = S.prizes.filter(x => x.used).slice(-4).reverse().map(x => `<div class="ticket used">${byId(x.id).e} ${esc(byId(x.id).n)} · canjeado el ${esc(x.used)}</div>`).join("");
+  const nextGoal = STREAK_GOALS.find(g => g > S.streak.days);
   const album = CREW.map(c => { const on = S.stickers.includes(c.id);
     return `<div class="sticker ${on?"":"off"}">${icon(c.sym,64,64)}<div>${on?esc(c.name):"???"}</div>${on?"":`<div class="cond">${esc(c.cond)}</div>`}</div>`; }).join("");
   const medals = Object.keys(SUBJ).map(id => `<div><span>${medal(id)}</span>${SUBJ[id].short}</div>`).join("");
@@ -1112,17 +1214,25 @@ function renderTreasure(){
       <h2 style="font-size:30px;margin:16px 0 4px">${RANKS[r].n}</h2>
       ${nx ? `<div class="bar" style="height:14px;margin:6px 20px"><i style="width:${Math.min(100,(S.berries-RANKS[r].b)/(nx.b-RANKS[r].b)*100)}%"></i></div><p class="hint" style="margin:4px 0 0">Siguiente rango: ${nx.n} (${fmtB(nx.b)})</p>` : `<p>¡Has llegado a lo más alto! 👑</p>`}
     </div>
-    <div class="card"><h2 style="margin:0;font-size:28px">🎬 Vales de capítulo</h2>
-      <p class="hint" style="margin:4px 0">Completa mapas 🧩 (${S.pieces}/${PIECES_PER_TICKET}) o saca 7+ en un examen. Papá o mamá los canjean con el código.</p>
+    <div class="card"><h2 style="margin:0;font-size:28px">🎁 Mis premios</h2>
+      <p class="hint" style="margin:4px 0">🧩 ${PIECES_PER_TICKET} piezas de mapa o un 7 en un examen = cofre sorpresa. 🔥 Con racha de días ¡eliges tú!</p>
       <p class="pieces" style="margin:4px 0">${"🧩".repeat(S.pieces)}${"▫️".repeat(PIECES_PER_TICKET - S.pieces)}</p>
-      ${tickets || `<p class="hint">Todavía no tienes vales. ¡A navegar!</p>`}
+      <p style="font-weight:900;margin:4px 0">🔥 Racha: ${S.streak.days} día${S.streak.days===1?"":"s"}${nextGoal ? ` · elige premio a los ${nextGoal} días` : ""}</p>
+      ${mine || `<p class="hint">Todavía no tienes premios. ¡A navegar!</p>`}
+      ${used}
+      <button class="btn ghost" style="margin-top:12px" onclick="showCatalog()">👀 Ver todos los premios posibles</button>
     </div>
     <div class="card"><h2 style="margin:0 0 8px;font-size:28px">🏅 Medallas por materia</h2><div class="medals">${medals}</div></div>
     <div class="card"><h2 style="margin:0 0 8px;font-size:28px">🏴‍☠️ Mi tripulación (${S.stickers.length}/${CREW.length})</h2><div class="album">${album}</div></div>`;
 }
-function redeem(){
-  askPin(() => { S.tickets.redeemed.push(new Date().toLocaleDateString("es-ES")); save(); render();
-    showModal(`<h2 style="font-size:34px;margin:0">¡A ver un capítulo! 🍿</h2>${icon("ship",160,134,"bob")}`, () => playAnim("sail"), "¡Vamos!"); });
+function redeem(k){
+  const x = S.prizes[k], p = PRIZES.find(q => q.id === x.id) || PRIZES[0];
+  askPin(() => { x.used = new Date().toLocaleDateString("es-ES"); save(); render();
+    showModal(`<h2 style="font-size:32px;margin:0">¡A disfrutar! ${p.e}</h2>${prizeCard(p)}`, () => playAnim(p.id === "capitulo" ? "sail" : "coins"), "¡Vamos!"); });
+}
+function showCatalog(){
+  showModal(`<h2 style="margin:0 0 8px;font-size:30px">Premios del cofre</h2>
+    <div class="catalog">${activePrizes().map(p => prizeCard(p)).join("")}</div>`, null, "¡A por ellos!");
 }
 
 // ---------------- CINE ----------------
@@ -1155,17 +1265,24 @@ function renderFamily(){
   app.innerHTML = `${hud()}
     <div class="card"><h2 style="margin:0;font-size:30px">👪 Familia</h2>
       <p style="margin:6px 0">Partidas: <b>${S.games}</b> · Aciertos totales: <b>${S.totalOk}</b> · Racha: <b>${S.streak.days} días</b></p>
-      <p style="margin:6px 0">Vales: <b>${S.tickets.earned}</b> ganados, <b>${S.tickets.redeemed.length}</b> canjeados</p>
+      <p style="margin:6px 0">Premios: <b>${S.prizes.length}</b> ganados, <b>${S.prizes.filter(x=>x.used).length}</b> canjeados</p>
       <ul style="margin:6px 0;padding-left:20px">${exams}</ul>
       <p class="hint">Las respuestas de cada examen están al final del examen, con el mismo código.</p>
       <div class="row">
-        <button class="btn ghost" onclick="S.tickets.earned++;save();render()">🎁 Regalar un vale</button>
+        <button class="btn ghost" onclick="S.chests++;S.chestFrom='Regalo de la familia 💝';save();afterRewards([])">🎁 Regalar un cofre</button>
         <button class="btn ghost" onclick="testSound()">🔔 Probar sonido</button>
         <button class="btn ghost" onclick="S.sound=!S.sound;if(!S.sound)stopMusic();save();render()">${S.sound?"🔊 Sonido sí":"🔇 Sonido no"}</button>
         <button class="btn ghost" onclick="if(confirm('¿Borrar TODO el progreso de la app? (los exámenes no se borran)')){S=blank();save();familyOpen=false;go('map')}">🗑️ Reiniciar</button>
       </div>
+    </div>
+    <div class="card"><h2 style="margin:0;font-size:26px">🎁 Premios que pueden salir</h2>
+      <p class="hint" style="margin:4px 0 8px">Quita los que no queráis dar. Probabilidad: común 60 %, raro 28 %, épico 12 %.</p>
+      ${PRIZES.map((p,k) => `<label class="spread" style="padding:6px 0;border-bottom:1px solid #e6d19b;font-weight:800">
+        <span>${p.e} ${esc(p.n)} <small style="color:${RARITY[p.r].c}">${RARITY[p.r].n}</small></span>
+        <input type="checkbox" style="width:24px;height:24px" ${S.prizeOff.includes(p.id)?"":"checked"} onchange="togglePrize(${k})"></label>`).join("")}
     </div>${subj}`;
 }
+function togglePrize(k){ const id = PRIZES[k].id, i = S.prizeOff.indexOf(id); i >= 0 ? S.prizeOff.splice(i,1) : S.prizeOff.push(id); save(); }
 
 // ---------------- ARRANQUE ----------------
 window.addEventListener("pageshow", () => { checkExams(); if (screen === "exams" || screen === "map") render(); });
