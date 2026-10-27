@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Examen Pirata de Medi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sea1:#0b4f8a; --sea2:#1590c9; --sand:#fff4d6; --paper:#fbe9b7; --ink:#3b2412;
+  --red:#d7263d; --gold:#f5b700; --green:#2a9d5b; --straw:#f2c94c; --wood:#8a5a2b;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:Nunito,system-ui,sans-serif; color:var(--ink);
+  background:linear-gradient(180deg,#7fd3ff 0%,#bde9ff 35%,var(--sea2) 62%,var(--sea1) 100%);
+  min-height:100vh; overflow-x:hidden;
+}
+h1,h2,.pirate{font-family:"Pirata One",Georgia,serif;font-weight:400;letter-spacing:.5px}
+.wrap{max-width:760px;margin:0 auto;padding:16px 16px 80px}
+.waves{position:fixed;left:0;right:0;bottom:0;height:70px;pointer-events:none;z-index:0}
+.waves svg{width:200%;height:100%;animation:wave 9s linear infinite}
+@keyframes wave{to{transform:translateX(-50%)}}
+.card{position:relative;z-index:1;background:var(--paper);border:4px solid var(--wood);border-radius:22px;
+  box-shadow:0 8px 0 #5d3a17,0 14px 30px rgba(0,0,0,.25);padding:22px;margin-top:16px}
+.btn{font:inherit;font-weight:900;font-size:18px;border:0;border-radius:14px;padding:12px 22px;cursor:pointer;
+  background:var(--red);color:#fff;box-shadow:0 5px 0 #8f1424;transition:transform .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #8f1424}
+.btn.gold{background:var(--gold);color:var(--ink);box-shadow:0 5px 0 #a87d00}
+.btn.ghost{background:#fff;color:var(--ink);box-shadow:0 5px 0 #c9b27a}
+.btn:disabled{opacity:.45;cursor:default}
+.center{text-align:center}
+.hero h1{font-size:46px;margin:6px 0 0;color:var(--red);text-shadow:2px 2px 0 #fff}
+.hero p{font-size:18px}
+.topbar{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
+.bounty{background:var(--paper);border:3px solid var(--wood);border-radius:12px;padding:6px 12px;font-weight:900;white-space:nowrap}
+.progress{flex:1;height:16px;background:rgba(255,255,255,.6);border-radius:10px;overflow:hidden;border:2px solid var(--wood)}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--red));width:0;transition:width .4s}
+.section-tag{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--straw);border-radius:999px;padding:4px 14px;font-weight:800;font-size:14px}
+.q-title{font-size:22px;font-weight:900;margin:14px 0 6px}
+.q-sentence{font-size:24px;font-weight:800;background:#fff;border-radius:14px;padding:14px 16px;margin:10px 0 14px;border:2px dashed var(--wood)}
+.opts{display:grid;gap:10px}
+.opt{font:inherit;font-size:19px;font-weight:800;text-align:left;background:#fff;border:3px solid #d9c18a;border-radius:14px;padding:12px 16px;cursor:pointer;color:var(--ink)}
+.opt:hover{border-color:var(--wood)}
+.opt.sel{border-color:var(--sea1);background:#dff2ff}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{font:inherit;font-weight:800;font-size:18px;padding:8px 14px;border-radius:12px;border:3px solid var(--wood);background:#fff;cursor:pointer;color:var(--ink)}
+.chip.used{opacity:.3;cursor:default}
+.slots{display:flex;flex-wrap:wrap;gap:8px;min-height:56px;background:rgba(255,255,255,.55);border:2px dashed var(--wood);border-radius:14px;padding:8px}
+.slot{background:var(--straw);border-radius:10px;padding:8px 12px;font-weight:900;font-size:18px;cursor:pointer}
+.slot b{color:var(--red);margin-right:6px}
+.cls-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:#fff;border-radius:14px;padding:8px 10px;margin-bottom:8px;border:2px solid #e6d19b}
+.cls-word{font-weight:900;font-size:19px;min-width:110px;flex:1}
+.cls-btn{font:inherit;font-weight:800;font-size:14px;border:2px solid #cdb47a;background:#fffaf0;border-radius:10px;padding:6px 10px;cursor:pointer;color:var(--ink)}
+.cls-btn.sel{background:var(--sea1);border-color:var(--sea1);color:#fff}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
+.feedback{font-weight:900;font-size:20px;margin-top:12px;min-height:28px}
+.feedback.ok{color:var(--green)} .feedback.ko{color:var(--red)}
+.hint{font-size:15px;opacity:.8}
+.poster{width:230px;margin:0 auto;background:#f3d9a0;border:6px solid #b8864b;padding:12px;box-shadow:0 6px 18px rgba(0,0,0,.3);transform:rotate(-2deg)}
+.poster .wanted{font-family:"Pirata One";font-size:44px;line-height:1;text-align:center}
+.poster .name{font-family:"Pirata One";font-size:21px;text-align:center}
+.poster .berries{font-weight:900;font-size:22px;text-align:center}
+table{width:100%;border-collapse:collapse;font-size:15px;background:#fff;border-radius:12px;overflow:hidden}
+th,td{padding:8px 10px;border-bottom:1px solid #eadcb5;vertical-align:top;text-align:left}
+th{background:var(--ink);color:var(--straw)}
+tr.bad td:first-child{border-left:6px solid var(--red)} tr.good td:first-child{border-left:6px solid var(--green)}
+.pill{display:inline-block;border-radius:8px;padding:1px 8px;font-weight:900}
+.pill.ok{background:#d6f5e2;color:#16683b}.pill.ko{background:#ffe0e3;color:#9b1020}
+.scroll{overflow-x:auto}
+.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.pop{animation:pop .5s}
+@keyframes pop{50%{transform:scale(1.08)}}
+.confetti{position:fixed;top:-20px;font-size:26px;z-index:9;animation:fall 2.6s linear forwards;pointer-events:none}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+.float{animation:float 3s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-8px) rotate(2deg)}}
+@media (max-width:520px){.hero h1{font-size:36px}.q-sentence{font-size:20px}.opt{font-size:17px}.poster{width:200px}}
+@media print{.waves,.no-print{display:none}body{background:#fff}.card{box-shadow:none}}
+</style>
+</head>
+<body>
+
+<!-- Dibuixos inspirats en One Piece -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="jolly" viewBox="0 0 200 200">
+      <circle cx="100" cy="100" r="96" fill="#111"/>
+      <path d="M52 150 L148 70 M52 70 L148 150" stroke="#fff" stroke-width="16" stroke-linecap="round"/>
+      <circle cx="52" cy="70" r="11" fill="#fff"/><circle cx="148" cy="70" r="11" fill="#fff"/>
+      <circle cx="52" cy="150" r="11" fill="#fff"/><circle cx="148" cy="150" r="11" fill="#fff"/>
+      <ellipse cx="100" cy="108" rx="40" ry="36" fill="#fff"/>
+      <rect x="80" y="128" width="40" height="22" rx="6" fill="#fff"/>
+      <ellipse cx="85" cy="108" rx="10" ry="12" fill="#111"/><ellipse cx="115" cy="108" rx="10" ry="12" fill="#111"/>
+      <path d="M96 124 L100 117 L104 124Z" fill="#111"/>
+      <path d="M88 138 v10 M100 138 v10 M112 138 v10" stroke="#111" stroke-width="3"/>
+      <ellipse cx="100" cy="80" rx="66" ry="13" fill="#f2c94c" stroke="#b8862a" stroke-width="3"/>
+      <path d="M62 80 Q64 40 100 38 Q136 40 138 80Z" fill="#f2c94c" stroke="#b8862a" stroke-width="3"/>
+      <path d="M63 72 Q100 82 137 72 L138 80 Q100 90 62 80Z" fill="#d7263d"/>
+    </symbol>
+    <symbol id="hat" viewBox="0 0 200 110">
+      <ellipse cx="100" cy="80" rx="95" ry="24" fill="#f2c94c" stroke="#b8862a" stroke-width="4"/>
+      <path d="M45 78 Q48 14 100 12 Q152 14 155 78Z" fill="#f2c94c" stroke="#b8862a" stroke-width="4"/>
+      <path d="M46 64 Q100 78 154 64 L155 78 Q100 92 45 78Z" fill="#d7263d"/>
+      <path d="M70 30 Q100 22 130 30" stroke="#b8862a" stroke-width="2" fill="none" opacity=".6"/>
+    </symbol>
+    <symbol id="ship" viewBox="0 0 240 200">
+      <path d="M118 20 V140" stroke="#5d3a17" stroke-width="7"/>
+      <path d="M58 38 Q118 25 178 38 L172 118 Q118 108 64 118Z" fill="#fff" stroke="#c9b27a" stroke-width="3"/>
+      <use href="#jolly" x="88" y="48" width="60" height="60"/>
+      <path d="M118 8 l32 9 -32 9z" fill="#111"/>
+      <path d="M20 140 H220 Q205 188 120 188 Q35 188 20 140Z" fill="#d4a15a" stroke="#8a5a2b" stroke-width="4"/>
+      <path d="M30 152 H210" stroke="#8a5a2b" stroke-width="3"/>
+      <circle cx="210" cy="132" r="18" fill="#fff" stroke="#8a5a2b" stroke-width="4"/>
+      <circle cx="205" cy="128" r="3" fill="#111"/><circle cx="215" cy="128" r="3" fill="#111"/>
+    </symbol>
+    <symbol id="fruit" viewBox="0 0 120 130">
+      <path d="M60 22 Q72 2 92 8" stroke="#2a7d3c" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M62 18 Q82 0 98 22 Q78 26 62 18Z" fill="#3fbf5f"/>
+      <circle cx="60" cy="74" r="48" fill="#8e44ad"/>
+      <path d="M30 60 q10 -14 20 0 q10 14 20 0 q10 -14 20 0 M24 82 q10 -14 20 0 q10 14 20 0 q10 -14 20 0 q6 -8 12 -4 M36 104 q10 -12 20 0 q10 12 20 0 q8 -10 14 -4"
+            stroke="#c39bd3" stroke-width="5" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="chest" viewBox="0 0 160 130">
+      <circle cx="40" cy="38" r="12" fill="#f5b700"/><circle cx="75" cy="30" r="14" fill="#ffd34d"/><circle cx="112" cy="36" r="12" fill="#f5b700"/>
+      <path d="M14 50 Q80 10 146 50 V70 H14Z" fill="#a0522d" stroke="#5d3a17" stroke-width="4"/>
+      <rect x="14" y="68" width="132" height="56" rx="6" fill="#b5652f" stroke="#5d3a17" stroke-width="4"/>
+      <rect x="66" y="62" width="28" height="30" rx="4" fill="#f5b700" stroke="#5d3a17" stroke-width="3"/>
+      <path d="M14 96 H146" stroke="#5d3a17" stroke-width="3"/>
+    </symbol>
+    <symbol id="swords" viewBox="0 0 140 140">
+      <g stroke-linecap="round">
+        <path d="M20 120 L120 20" stroke="#cfd8dc" stroke-width="8"/><path d="M28 98 L42 112" stroke="#2a9d5b" stroke-width="10"/>
+        <path d="M120 120 L20 20" stroke="#cfd8dc" stroke-width="8"/><path d="M112 98 L98 112" stroke="#fff" stroke-width="10"/>
+        <path d="M70 130 L70 10" stroke="#cfd8dc" stroke-width="8"/><path d="M60 112 H80" stroke="#d7263d" stroke-width="10"/>
+      </g>
+    </symbol>
+    <symbol id="map" viewBox="0 0 140 110">
+      <path d="M8 14 L48 4 L92 14 L132 4 V96 L92 106 L48 96 L8 106Z" fill="#fbe9b7" stroke="#8a5a2b" stroke-width="4"/>
+      <path d="M48 4 V96 M92 14 V106" stroke="#d9c18a" stroke-width="3"/>
+      <path d="M22 80 Q40 50 60 66 T104 40" stroke="#d7263d" stroke-width="4" fill="none" stroke-dasharray="6 6"/>
+      <path d="M100 30 l12 12 M112 30 l-12 12" stroke="#d7263d" stroke-width="5" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="waves"><svg viewBox="0 0 1200 70" preserveAspectRatio="none">
+  <path d="M0 30 Q75 0 150 30 T300 30 T450 30 T600 30 T750 30 T900 30 T1050 30 T1200 30 V70 H0Z" fill="#0b4f8a" opacity=".9"/>
+</svg></div>
+
+<div class="wrap" id="app"></div>
+
+<script>
+// ------------------------------------------------------------------
+// PREGUNTES (basades en la fitxa de Medi «Les plantes: l'agricultura», 21/10/26)
+// type: choice | order | classify
+// ------------------------------------------------------------------
+const SECTIONS = {
+  def:   {name:"Repte del Luffy · Què és l'agricultura?", icon:"hat"},
+  on:    {name:"Repte de la Nami · On es conrea?", icon:"map"},
+  var:   {name:"Repte del Sanji · Monocultiu o policultiu", icon:"chest"},
+  aigua: {name:"Repte de l'Usopp · Secà o regadiu", icon:"ship"},
+  final: {name:"Repte final · Pensa com un pagès", icon:"fruit"},
+};
+
+const Q = [
+  // --- Què és l'agricultura
+  {s:"def", type:"choice", title:"Què és l'AGRICULTURA?",
+   options:["Treballar la terra per obtenir aliments","Pescar peixos al mar","Criar animals a la granja","Fabricar joguines en una fàbrica"], answer:"Treballar la terra per obtenir aliments"},
+  {s:"def", type:"choice", title:"Com es diu la persona que treballa la terra?",
+   options:["pagès o pagesa","pescador","miner","mariner"], answer:"pagès o pagesa"},
+  {s:"def", type:"choice", title:"Quin d'aquests aliments ve de l'agricultura?",
+   options:["el blat","el peix","la llet","els ous"], answer:"el blat"},
+  {s:"def", type:"classify", title:"Ve de l'agricultura (plantes) o dels animals?",
+   cats:["Agricultura","Animals"],
+   items:{"tomàquet":"Agricultura","peix":"Animals","taronja":"Agricultura","llet":"Animals","arròs":"Agricultura","ous":"Animals"}},
+
+  // --- On es conrea
+  {s:"on", type:"choice", title:"On es conrea depèn de quants factors?",
+   options:["2","3","4"], answer:"3"},
+  {s:"on", type:"choice", title:"Quins són els TRES factors?",
+   options:["relleu, sòl i clima","mar, platja i sol","vent, núvols i neu","ciutat, carrer i parc"], answer:"relleu, sòl i clima"},
+  {s:"on", type:"choice", title:"El RELLEU és…",
+   options:["la forma del terreny: plana, muntanya, vall","el tipus de terra","el temps que fa durant l'any"], answer:"la forma del terreny: plana, muntanya, vall"},
+  {s:"on", type:"choice", title:"El SÒL és…",
+   options:["la forma del terreny","la terra on creixen les plantes","el temps que fa"], answer:"la terra on creixen les plantes"},
+  {s:"on", type:"choice", title:"El CLIMA és…",
+   options:["la terra del camp","una muntanya molt alta","el temps que fa normalment en un lloc durant l'any"], answer:"el temps que fa normalment en un lloc durant l'any"},
+  {s:"on", type:"choice", title:"On és més fàcil conrear?",
+   options:["en una plana amb bona terra","dalt d'una muntanya molt alta","en un desert sense aigua"], answer:"en una plana amb bona terra"},
+  {s:"on", type:"order", title:"Ordena els tres factors per ordre alfabètic (toca'ls en ordre):",
+   words:["sòl","clima","relleu"], answer:["clima","relleu","sòl"]},
+
+  // --- Segons la varietat
+  {s:"var", type:"choice", title:"Què és el MONOCULTIU?",
+   options:["Conrear una sola planta en un camp","Conrear moltes plantes diferents","No conrear res"], answer:"Conrear una sola planta en un camp"},
+  {s:"var", type:"choice", title:"Què és el POLICULTIU?",
+   options:["Conrear una sola planta","Conrear moltes plantes diferents al mateix lloc","Conrear només a l'hivern"], answer:"Conrear moltes plantes diferents al mateix lloc"},
+  {s:"var", type:"choice", title:"Un camp gegant on només hi ha blat de moro és…",
+   options:["monocultiu","policultiu"], answer:"monocultiu"},
+  {s:"var", type:"choice", title:"Un hort amb tomàquets, enciams, mongetes i maduixes és…",
+   options:["monocultiu","policultiu"], answer:"policultiu"},
+  {s:"var", type:"choice", title:"La Nami té un camp només de mandarines. És…",
+   options:["monocultiu","policultiu"], answer:"monocultiu"},
+
+  // --- Segons la necessitat d'aigua
+  {s:"aigua", type:"choice", title:"Què és un conreu de SECÀ?",
+   options:["Només rep l'aigua de la pluja","El reguem amb canals i mànegues","Creix dins del mar"], answer:"Només rep l'aigua de la pluja"},
+  {s:"aigua", type:"choice", title:"Què és un conreu de REGADIU?",
+   options:["Només rep l'aigua de la pluja","Les persones el reguen amb canals, sèquies o aspersors","No necessita aigua"], answer:"Les persones el reguen amb canals, sèquies o aspersors"},
+  {s:"aigua", type:"classify", title:"Secà o regadiu? Classifica-les:",
+   cats:["Secà","Regadiu"],
+   items:{"olivera":"Secà","arròs":"Regadiu","vinya":"Secà","enciam":"Regadiu","ametller":"Secà","tomàquets":"Regadiu"}},
+  {s:"aigua", type:"choice", title:"Com s'escriu correctament?",
+   options:["regadiu","reguadiu","regadíu"], answer:"regadiu"},
+
+  // --- Pensa com un pagès
+  {s:"final", type:"choice", title:"En un poble plou poc i no hi ha riu. Què hi conrearies?",
+   options:["Oliveres (secà)","Arròs (regadiu)"], answer:"Oliveres (secà)"},
+  {s:"final", type:"choice", title:"Per què és tan important l'agricultura?",
+   options:["Perquè ens dona aliments","Perquè fa soroll","Perquè ens dona electricitat"], answer:"Perquè ens dona aliments"},
+];
+
+const BOUNTY_PER = 50000000; // 50 milions de berries per resposta correcta
+let i = 0, answers = Array(Q.length).fill(null), started = false;
+const app = document.getElementById("app");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = n => n.toLocaleString("ca-ES");
+const icon = (id, w=80, h=80, cls="") => `<svg class="${cls}" width="${w}" height="${h}"><use href="#${id}"/></svg>`;
+
+function isCorrect(q, a){
+  if (a == null) return false;
+  if (q.type === "choice") return a === q.answer;
+  if (q.type === "order") return a.join("|") === q.answer.join("|");
+  if (q.type === "classify") return Object.keys(q.items).every(k => a[k] === q.items[k]);
+}
+function isComplete(q, a){
+  if (a == null) return false;
+  if (q.type === "order") return a.length === q.words.length;
+  if (q.type === "classify") return Object.keys(q.items).every(k => a[k]);
+  return true;
+}
+const score = () => Q.reduce((s,q,k) => s + (isCorrect(q, answers[k]) ? 1 : 0), 0);
+
+function renderStart(){
+  app.innerHTML = `
+  <div class="card hero center">
+    <div class="float">${icon("jolly",130,130)}</div>
+    <h1>L'Examen Pirata de Medi</h1>
+    <p>Ahoy, <b>CaptainLukiLufy</b>! 🏴‍☠️ Per entrar a la tripulació del barret de palla has de superar <b>${Q.length} reptes</b> de medi: les plantes i l'agricultura 🌱</p>
+    <p class="hint">Cada resposta correcta puja la teva recompensa en 50 milions de berries 💰</p>
+    <div style="display:flex;justify-content:center;gap:14px;margin:12px 0 18px;flex-wrap:wrap">
+      ${icon("map",70,56)}${icon("swords",56,56)}${icon("chest",70,56)}${icon("fruit",52,56)}
+    </div>
+    ${(() => { const d = load(); const n = d ? d.answers.filter(x => x != null).length : 0;
+      return n ? `<p><b>Tens ${n} respostes guardades${d.finished ? " (examen acabat)" : ""}.</b></p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button class="btn" onclick="resume()">${d.finished ? "Veure resultats 🏁" : `Continuar (pregunta ${Math.min((d.i||0)+1, Q.length)}) ⚓`}</button>
+          <button class="btn ghost" onclick="restart()">Començar de nou</button></div>`
+        : `<button class="btn" onclick="start()">Salpem! ⚓</button>`; })()}
+  </div>`;
+}
+function start(){ started = true; i = 0; render(); }
+
+function render(){
+  const q = Q[i], sec = SECTIONS[q.s], a = answers[i];
+  let body = "";
+  if (q.type === "choice"){
+    body = `<div class="opts">${q.options.map((o,k) =>
+      `<button class="opt ${a===o?"sel":""}" onclick="pick(${k})">${esc(o)}</button>`).join("")}</div>`;
+  } else if (q.type === "order"){
+    const cur = a || [];
+    body = `<div class="chips">${q.words.map((w,k) =>
+      `<button class="chip ${cur.includes(w)?"used":""}" ${cur.includes(w)?"disabled":""} onclick="addOrder(${k})">${esc(w)}</button>`).join("")}</div>
+      <div class="slots">${cur.length ? cur.map((w,k)=>`<span class="slot" title="Toca per treure" onclick="removeOrder(${k})"><b>${k+1}.</b>${esc(w)}</span>`).join("") : `<span class="hint">Toca les paraules de dalt en l'ordre correcte…</span>`}</div>
+      <p class="hint">T'has equivocat? Toca una paraula de baix per treure-la.</p>`;
+  } else if (q.type === "classify"){
+    const cur = a || {};
+    body = Object.keys(q.items).map((w,wi) => `
+      <div class="cls-row"><span class="cls-word">${esc(w)}</span>
+        ${q.cats.map((c,ci) => `<button class="cls-btn ${cur[w]===c?"sel":""}" onclick="setCls(${wi},${ci})">${esc(c)}</button>`).join("")}
+      </div>`).join("");
+  }
+  const pct = Math.round(i / Q.length * 100);
+  app.innerHTML = `
+    <div class="topbar">
+      ${icon("hat",54,30)}
+      <div class="progress"><i style="width:${pct}%"></i></div>
+      <span class="bounty">💰 ${fmt(score()*BOUNTY_PER)} ฿</span>
+    </div>
+    <div class="card" id="qcard">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <span class="section-tag">${esc(sec.name)}</span>
+        <span>${icon(sec.icon,52,46)}</span>
+      </div>
+      <div class="q-title">${i+1}/${Q.length}. ${esc(q.title)}</div>
+      ${q.sentence ? `<div class="q-sentence">${esc(q.sentence)}</div>` : ""}
+      ${body}
+      <div class="feedback" id="fb"></div>
+      <div class="nav">
+        <button class="btn ghost" ${i===0?"disabled":""} onclick="go(-1)">◀ Enrere</button>
+        <button class="btn gold" id="next" ${isComplete(q,a)?"":"disabled"} onclick="go(1)">${i===Q.length-1?"Acabar 🏁":"Següent ▶"}</button>
+      </div>
+    </div>`;
+}
+
+function pick(k){ answers[i] = Q[i].options[k]; save(); render(); }
+function addOrder(k){ const w = Q[i].words[k], c = answers[i] ? [...answers[i]] : []; if (!c.includes(w)) c.push(w); answers[i] = c; save(); render(); }
+function removeOrder(k){ const c = [...answers[i]]; c.splice(k,1); answers[i] = c.length?c:null; save(); render(); }
+function setCls(wi,ci){ const q = Q[i], w = Object.keys(q.items)[wi]; answers[i] = {...(answers[i]||{}), [w]:q.cats[ci]}; save(); render(); }
+
+// --- Guardat automàtic del progrés (al navegador)
+const SAVE_KEY = "glds-examen-medi-1";
+function save(finished){
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({i, answers, finished: !!finished, at: Date.now(), score: score(), total: Q.length})); } catch(e){}
+}
+function load(){
+  try { const d = JSON.parse(localStorage.getItem(SAVE_KEY)); if (d && Array.isArray(d.answers) && d.answers.length === Q.length) return d; } catch(e){}
+  return null;
+}
+function resume(){ const d = load(); answers = d.answers; i = Math.min(d.i||0, Q.length-1); started = true; d.finished ? renderResults() : render(); }
+
+function go(d){
+  if (d > 0 && i === Q.length-1){ renderResults(); return; }
+  i = Math.max(0, Math.min(Q.length-1, i+d)); save(); render(); window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function fmtAnswer(q, a){
+  if (a == null) return "<i>(sense resposta)</i>";
+  if (q.type === "choice") return esc(a);
+  if (q.type === "order") return a.map(esc).join(", ");
+  return Object.keys(q.items).map(k => {
+    const ok = a[k] === q.items[k];
+    return `<div>${ok?"✅":"❌"} <b>${esc(k)}</b> → ${esc(a[k]||"—")}</div>`;
+  }).join("");
+}
+function fmtCorrect(q){
+  if (q.type === "choice") return esc(q.answer);
+  if (q.type === "order") return q.answer.map(esc).join(", ");
+  return Object.entries(q.items).map(([k,v]) => `<div><b>${esc(k)}</b> → ${esc(v)}</div>`).join("");
+}
+
+function renderResults(){
+  save(true);
+  const s = score(), total = Q.length, pct = s/total;
+  const nota = (s/total*10).toFixed(1).replace(".", ",");
+  const msg = pct===1 ? "PERFECTE! Ets el futur Rei dels Pirates! 👑"
+            : pct>=0.8 ? "Increïble! Ja formes part de la tripulació! 🏴‍☠️"
+            : pct>=0.5 ? "Molt bé, pirata! Repassa els errors i seràs imbatible ⚓"
+            : "Bon intent! Fins i tot el Luffy va haver d'entrenar molt. Tornem-hi! 💪";
+  const rows = Q.map((q,k) => {
+    const ok = isCorrect(q, answers[k]);
+    return `<tr class="${ok?"good":"bad"}">
+      <td><b>${k+1}</b></td>
+      <td>${esc(q.title)}${q.sentence?`<br><i>«${esc(q.sentence)}»</i>`:""}</td>
+      <td>${fmtAnswer(q, answers[k])}</td>
+      <td>${fmtCorrect(q)}</td>
+      <td><span class="pill ${ok?"ok":"ko"}">${ok?"Bé":"Error"}</span></td></tr>`;
+  }).join("");
+  const bySec = Object.keys(SECTIONS).map(key => {
+    const idx = Q.map((q,k)=>k).filter(k=>Q[k].s===key);
+    const good = idx.filter(k=>isCorrect(Q[k],answers[k])).length;
+    return `<div class="cls-row"><span class="cls-word">${esc(SECTIONS[key].name)}</span><b>${good}/${idx.length}</b></div>`;
+  }).join("");
+
+  app.innerHTML = `
+    <div class="card center pop">
+      <div class="poster">
+        <div class="wanted">WANTED</div>
+        <div style="background:#fff7e0;border:3px solid #b8864b;margin:6px 0;padding:6px">${icon("jolly",150,150)}</div>
+        <div class="name">CaptainLukiLufy</div>
+        <div class="berries">฿ ${fmt(s*BOUNTY_PER)}</div>
+      </div>
+      <h2 style="font-size:34px;margin:18px 0 4px">${s} de ${total} correctes · Nota: ${nota}</h2>
+      <p style="font-size:19px;font-weight:800">${msg}</p>
+      <div class="no-print" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn" onclick="restart()">Tornar a jugar 🔁</button>
+        <button class="btn ghost" onclick="window.print()">Imprimir resultats 🖨️</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">Resultat per reptes</h2>
+      ${bySec}
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">Respostes correctes (per a la família)</h2>
+      <div class="no-print" id="famBtn" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input id="famPin" type="password" inputmode="numeric" placeholder="Codi família" onkeydown="if(event.key==='Enter')showFamily()"
+          style="font:inherit;font-size:18px;font-weight:800;padding:10px 12px;border-radius:12px;border:3px solid #d9c18a;width:160px">
+        <button class="btn ghost" onclick="showFamily()">🔒 Mostrar respostes</button>
+        <span id="famErr" style="color:var(--red);font-weight:900"></span>
+      </div>
+      <div class="scroll" id="family" hidden><table>
+        <thead><tr><th>#</th><th>Pregunta</th><th>Resposta de CaptainLukiLufy</th><th>Resposta correcta</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>`;
+  window.scrollTo({top:0});
+  if (pct >= 0.5) confetti();
+}
+
+const FAMILY_PIN = "2026";
+function showFamily(){
+  const pin = document.getElementById("famPin").value;
+  if (pin.trim() !== FAMILY_PIN){ document.getElementById("famErr").textContent = "Codi incorrecte 🏴‍☠️"; return; }
+  document.getElementById("family").hidden = false;
+  document.getElementById("famBtn").remove();
+}
+function restart(){ if (!confirm("Segur que vols començar de nou? Es perdran les respostes.")) return; answers = Array(Q.length).fill(null); i = 0; save(); start(); }
+function confetti(){
+  const e = ["🏴‍☠️","💰","⭐","👒","🍖","⚓"];
+  for (let k=0;k<40;k++){
+    const d = document.createElement("div"); d.className = "confetti";
+    d.textContent = e[k % e.length]; d.style.left = Math.random()*100+"vw";
+    d.style.animationDelay = Math.random()*1.2+"s"; document.body.appendChild(d);
+    setTimeout(()=>d.remove(), 4200);
+  }
+}
+renderStart();
+// Si se abre desde la app "Gran Line del Saber", botón para volver al barco
+if (location.pathname.includes("/examenes/")) {
+  const back = document.createElement("a");
+  back.href = "../index.html"; back.textContent = "⬅ Barco"; back.className = "btn ghost no-print";
+  back.style.cssText = "position:fixed;top:calc(10px + env(safe-area-inset-top));left:10px;z-index:5;font-size:15px;padding:8px 14px;text-decoration:none";
+  document.body.appendChild(back);
+  document.querySelector(".wrap").style.paddingTop = "64px";
+}
+</script>
+</body>
+</html>

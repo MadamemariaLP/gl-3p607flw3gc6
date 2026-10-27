@@ -332,6 +332,7 @@ h1,h2,h3,.pirate{font-family:"Pirata One",Georgia,serif;font-weight:400;letter-s
 const SUBJ = {
   cat: {zone:"school", name:"Illa del Català",      short:"Català",     emoji:"📕", color:"#d7263d", boss:"El Pop de les Faltes",  bossColor:"#c0392b"},
   cas: {zone:"school", name:"Isla del Castellano",  short:"Castellano", emoji:"📘", color:"#1f6fd1", boss:"El Kraken Gramatical",  bossColor:"#2e86c1"},
+  med: {zone:"school", name:"Illa del Medi",       short:"Medi",       emoji:"🌱", color:"#6ab04c", boss:"La Mala Herba Gegant",  bossColor:"#6ab04c"},
   mat: {zone:"bonus", name:"Isla de los Números",  short:"Mates",      emoji:"✖️", color:"#2a9d5b", boss:"El Rey Multiplicón",    bossColor:"#27ae60"},
   gen: {zone:"bonus", name:"Isla del Saber",       short:"Cultura",    emoji:"🌍", color:"#e07a12", boss:"El Almirante Preguntón",bossColor:"#d35400"},
   eng: {zone:"bonus", name:"English Island",       short:"Inglés",     emoji:"🔤", color:"#8e44ad", boss:"Captain Grammar",       bossColor:"#8e44ad"},
@@ -427,6 +428,35 @@ const BANK = {
     {t:"order", q:"Forma la frase en PASADO:", w:["Luffy","comió","mucha","carne","ayer"]},
     {t:"order", q:"Forma la pregunta:", w:["¿Dónde","está","el","tesoro?"]},
     {t:"order", q:"Forma la frase exclamativa:", w:["¡Qué","barco","tan","bonito!"]},
+  ],
+  // ---- Medi (examen 3: «Les plantes: l'agricultura», 21/10/26)
+  med: [
+    {q:"Què és l'AGRICULTURA?", o:["Treballar la terra per obtenir aliments","Pescar peixos al mar","Criar animals a la granja"], a:"Treballar la terra per obtenir aliments"},
+    {q:"Com es diu qui treballa la terra?", o:["pagès o pagesa","pescador","miner","mariner"], a:"pagès o pagesa"},
+    {q:"Quin aliment ve de l'agricultura?", o:["el blat","el peix","la llet","els ous"], a:"el blat"},
+    {q:"Ve de les plantes o dels animals?", s:"tomàquet", o:["Plantes","Animals"], a:"Plantes"},
+    {q:"Ve de les plantes o dels animals?", s:"llet", o:["Plantes","Animals"], a:"Animals"},
+    {q:"Ve de les plantes o dels animals?", s:"arròs", o:["Plantes","Animals"], a:"Plantes"},
+    {q:"On es conrea depèn de quants factors?", o:["2","3","4"], a:"3"},
+    {q:"Quins són els tres factors?", o:["relleu, sòl i clima","mar, platja i sol","vent, núvols i neu"], a:"relleu, sòl i clima"},
+    {q:"La forma del terreny (plana, muntanya, vall) és…", o:["el relleu","el sòl","el clima"], a:"el relleu"},
+    {q:"La terra on creixen les plantes és…", o:["el relleu","el sòl","el clima"], a:"el sòl"},
+    {q:"El temps que fa normalment en un lloc és…", o:["el relleu","el sòl","el clima"], a:"el clima"},
+    {q:"On és més fàcil conrear?", o:["en una plana","dalt d'una muntanya","en un desert"], a:"en una plana"},
+    {q:"Conrear UNA sola planta en un camp és…", o:["monocultiu","policultiu"], a:"monocultiu"},
+    {q:"Conrear MOLTES plantes diferents és…", o:["monocultiu","policultiu"], a:"policultiu"},
+    {q:"Un camp només de blat de moro és…", o:["monocultiu","policultiu"], a:"monocultiu"},
+    {q:"Un hort amb tomàquets, enciams i maduixes és…", o:["monocultiu","policultiu"], a:"policultiu"},
+    {q:"Un conreu que només rep aigua de la pluja és de…", o:["secà","regadiu"], a:"secà"},
+    {q:"Un conreu que reguem amb canals i sèquies és de…", o:["secà","regadiu"], a:"regadiu"},
+    {q:"Secà o regadiu?", s:"olivera", o:["Secà","Regadiu"], a:"Secà"},
+    {q:"Secà o regadiu?", s:"arròs", o:["Secà","Regadiu"], a:"Regadiu"},
+    {q:"Secà o regadiu?", s:"vinya", o:["Secà","Regadiu"], a:"Secà"},
+    {q:"Secà o regadiu?", s:"enciam", o:["Secà","Regadiu"], a:"Regadiu"},
+    {q:"Plou poc i no hi ha riu. Què hi conrearies?", o:["Oliveres","Arròs"], a:"Oliveres"},
+    {q:"Com s'escriu?", o:["regadiu","reguadiu","regadíu"], a:"regadiu"},
+    {t:"order", q:"Ordena els factors per ordre alfabètic:", w:["clima","relleu","sòl"]},
+    {t:"order", q:"Forma la frase:", w:["L'agricultura","és","treballar","la","terra"]},
   ],
   mat: [], // se generan al vuelo (genMat)
   // ---- Cultura general (del Mapa del Saber + nuevas)
@@ -530,6 +560,7 @@ const CREW = [
   {id:"jinbe",  name:"Jinbe",   sym:"st-jinbe",  cond:"3⭐ en Inglés",                      ok:s=>(s.stars.eng||0)>=3},
   {id:"sunny",  name:"El barco",sym:"ship",      cond:"3⭐ en Mates",                       ok:s=>(s.stars.mat||0)>=3},
   {id:"sabio",  name:"Sabio",   sym:"map",       cond:"3⭐ en Cultura",                     ok:s=>(s.stars.gen||0)>=3},
+  {id:"pages",  name:"Pagès",   sym:"fruit",     cond:"3⭐ en Medi",                        ok:s=>(s.stars.med||0)>=3},
 ];
 const ANIMS = [
   {id:"sail",   name:"El barco zarpa",          rank:0},
@@ -542,6 +573,7 @@ const ANIMS = [
 const EXAMS = [
   {key:"glds-examen-catala-1",     file:"examenes/catala-1.html",     name:"Examen Pirata de Català", sub:"Fitxa T-1 i T-2"},
   {key:"glds-examen-castellano-1", file:"examenes/castellano-1.html", name:"Examen Pirata de Castellano", sub:"Ficha repaso T-1"},
+  {key:"glds-examen-medi-1",       file:"examenes/medi-1.html",       name:"Examen Pirata de Medi", sub:"Les plantes: l'agricultura"},
 ];
 const FAMILY_PIN = "2026";
 const PIECES_PER_TICKET = 4;
@@ -570,7 +602,30 @@ const today = () => new Date().toLocaleDateString("sv");
 // SONIDOS PIRATAS (sintetizados con Web Audio, sin archivos ni audios de la serie)
 // ==================================================================
 let AC = null, musicTimer = null, musicBus = null;
-function ac(){ AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === "suspended") AC.resume(); return AC; }
+function ac(){ AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state !== "running") AC.resume().catch(()=>{}); return AC; }
+// iPhone: el audio web se silencia con el interruptor de silencio y solo se desbloquea con un toque.
+// 1) audioSession "playback" (iOS 17+)  2) un <audio> mudo en bucle pone el móvil en modo "reproducción"
+// 3) un sonido vacío dentro del gesto del usuario desbloquea el AudioContext.
+let silentEl = null;
+function silentWav(){
+  const n = 800, b = new ArrayBuffer(44 + n*2), v = new DataView(b), w = (o, t) => [...t].forEach((c,i) => v.setUint8(o+i, c.charCodeAt(0)));
+  w(0,"RIFF"); v.setUint32(4,36+n*2,true); w(8,"WAVE"); w(12,"fmt "); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,8000,true); v.setUint32(28,16000,true); v.setUint16(32,2,true); v.setUint16(34,16,true); w(36,"data"); v.setUint32(40,n*2,true);
+  return URL.createObjectURL(new Blob([b], {type:"audio/wav"}));
+}
+function unlockAudio(){
+  if (!S.sound) return;
+  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch(e){}
+  try {
+    if (!silentEl){ silentEl = new Audio(silentWav()); silentEl.loop = true; silentEl.setAttribute("playsinline",""); silentEl.volume = .01; }
+    if (silentEl.paused) silentEl.play().catch(()=>{});
+  } catch(e){}
+  try { const c = ac(), src = c.createBufferSource(); src.buffer = c.createBuffer(1, 1, 22050); src.connect(c.destination); src.start(0); } catch(e){}
+  startMusic();
+}
+["touchend","click","keydown"].forEach(ev => document.addEventListener(ev, unlockAudio, {passive:true}));
+document.addEventListener("visibilitychange", () => { if (document.hidden){ stopMusic(); if (silentEl) silentEl.pause(); } });
+function testSound(){ unlockAudio(); sBell(); setTimeout(sCoins, 500); setTimeout(sJingle, 900); }
 function bus(){ const c = ac(); if (!musicBus){ musicBus = c.createGain(); musicBus.connect(c.destination); } return musicBus; }
 function tone(f, d, {type="triangle", vol=.18, at=0, slide=0, attack=.005, music=false}={}){
   if (!S.sound) return;
@@ -612,8 +667,8 @@ function startMusic(){
   loop();
 }
 function stopMusic(){ clearTimeout(musicTimer); musicTimer = null; try { bus().gain.value = 0; } catch(e){} }
-function toggleMusic(){ S.music = !S.music; save(); S.music ? startMusic() : stopMusic(); render(); }
-document.addEventListener("pointerdown", () => { ac(); startMusic(); }, {once:true});
+function toggleMusic(){ if (!S.sound){ S.sound = true; S.music = true; } else S.music = !S.music; save(); if (S.music){ unlockAudio(); sBell(); } else stopMusic(); render(); }
+
 
 // ==================================================================
 // NAVEGACIÓN
@@ -634,7 +689,7 @@ function hud(){
 
 // ---------------- MAPA (dos mares) ----------------
 const SEAS = {
-  school: {title:"🏫 Mar de la Escuela", sub:"Lo que estudias en el cole y los exámenes de tus fichas", isl:[["cat",95,78],["cas",262,160],["exam",115,262]]},
+  school: {title:"🏫 Mar de la Escuela", sub:"Lo que estudias en el cole y los exámenes de tus fichas", isl:[["cat",95,78],["cas",262,160],["med",95,262],["exam",262,350]]},
   bonus:  {title:"💎 Mar del Tesoro",    sub:"Retos extra para ganar MÁS recompensas: ¡berries x2!",    isl:[["mat",262,78],["gen",95,160],["eng",250,262]]},
 };
 function islandSVG(id,x,y){
@@ -658,13 +713,13 @@ function islandSVG(id,x,y){
 }
 function seaCard(key){
   const sea = SEAS[key], here = sea.isl.find(x => x[0] === S.lastIsland);
-  const [a,b,c] = sea.isl;
-  const route = `M${a[1]} ${a[2]} C${(a[1]+b[1])/2} ${a[2]} ${b[1]} ${a[2]+20} ${b[1]} ${b[2]} S${c[1]} ${b[2]+30} ${c[1]} ${c[2]}`;
+  const pts = sea.isl, H = Math.max(...pts.map(p => p[2])) + 90;
+  const route = pts.map((p,k) => k ? `S${p[1]} ${pts[k-1][2] + 30} ${p[1]} ${p[2]}` : `M${p[1]} ${p[2]}`).join(" ");
   return `<div class="card sea-${key}" style="padding:12px">
     <h2 style="margin:0;font-size:28px">${sea.title}</h2><p class="hint" style="margin:2px 0 8px">${sea.sub}</p>
     <div class="map" style="border-radius:16px;overflow:hidden;border:3px solid var(--wood)">
-      <svg viewBox="0 0 360 350">
-        <rect width="360" height="350" fill="${key === "bonus" ? "url(#seaGold)" : "url(#seaGrad)"}"/>
+      <svg viewBox="0 0 360 ${H}">
+        <rect width="360" height="${H}" fill="${key === "bonus" ? "url(#seaGold)" : "url(#seaGrad)"}"/>
         <g stroke="#fff" stroke-opacity=".35" stroke-width="3" fill="none"><path d="M20 230 q15 -10 30 0 t30 0"/><path d="M280 200 q15 -10 30 0 t30 0"/><path d="M160 30 q15 -10 30 0 t30 0"/></g>
         ${key === "bonus" ? `<text x="180" y="225" font-size="30" text-anchor="middle" opacity=".7">✨💎✨</text>` : ""}
         <path d="${route}" stroke="#fff" stroke-width="5" stroke-dasharray="4 12" stroke-linecap="round" fill="none" opacity=".85"/>
@@ -1105,6 +1160,7 @@ function renderFamily(){
       <p class="hint">Las respuestas de cada examen están al final del examen, con el mismo código.</p>
       <div class="row">
         <button class="btn ghost" onclick="S.tickets.earned++;save();render()">🎁 Regalar un vale</button>
+        <button class="btn ghost" onclick="testSound()">🔔 Probar sonido</button>
         <button class="btn ghost" onclick="S.sound=!S.sound;if(!S.sound)stopMusic();save();render()">${S.sound?"🔊 Sonido sí":"🔇 Sonido no"}</button>
         <button class="btn ghost" onclick="if(confirm('¿Borrar TODO el progreso de la app? (los exámenes no se borran)')){S=blank();save();familyOpen=false;go('map')}">🗑️ Reiniciar</button>
       </div>
