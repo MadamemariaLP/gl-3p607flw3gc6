@@ -1,0 +1,1121 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gran Line del Saber</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gran Line">
+<meta name="theme-color" content="#0b4f8a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sea1:#0b4f8a; --sea2:#1590c9; --paper:#fbe9b7; --ink:#3b2412;
+  --red:#d7263d; --gold:#f5b700; --green:#2a9d5b; --straw:#f2c94c; --wood:#8a5a2b;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{
+  font-family:Nunito,system-ui,sans-serif; color:var(--ink);
+  background:linear-gradient(180deg,#7fd3ff 0%,#bde9ff 30%,var(--sea2) 58%,var(--sea1) 100%) fixed;
+  min-height:100vh; overflow-x:hidden; touch-action:manipulation;
+  -webkit-user-select:none; user-select:none;
+}
+h1,h2,h3,.pirate{font-family:"Pirata One",Georgia,serif;font-weight:400;letter-spacing:.5px}
+.wrap{max-width:640px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top)) 16px calc(96px + env(safe-area-inset-bottom))}
+.card{position:relative;background:var(--paper);border:4px solid var(--wood);border-radius:22px;
+  box-shadow:0 7px 0 #5d3a17,0 12px 26px rgba(0,0,0,.22);padding:18px;margin-top:14px}
+.btn{font:inherit;font-weight:900;font-size:18px;border:0;border-radius:14px;padding:12px 20px;cursor:pointer;
+  background:var(--red);color:#fff;box-shadow:0 5px 0 #8f1424;transition:transform .08s;text-decoration:none;display:inline-block}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #8f1424}
+.btn.gold{background:var(--gold);color:var(--ink);box-shadow:0 5px 0 #a87d00}
+.btn.ghost{background:#fff;color:var(--ink);box-shadow:0 5px 0 #c9b27a}
+.btn.green{background:var(--green);box-shadow:0 5px 0 #17643a}
+.btn.blue{background:var(--sea1);box-shadow:0 5px 0 #062c4e}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.block{display:block;width:100%;text-align:left;margin-top:12px}
+.btn small{display:block;font-weight:700;font-size:14px;opacity:.85}
+.center{text-align:center}
+.hint{font-size:15px;opacity:.8}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spread{display:flex;justify-content:space-between;align-items:center;gap:10px}
+
+/* Cabecera */
+.hud{display:flex;align-items:center;gap:10px}
+.hud .title{font-family:"Pirata One";font-size:clamp(22px,6.4vw,30px);color:#fff;text-shadow:2px 2px 0 var(--sea1);flex:1;line-height:1}
+.chip{background:var(--paper);border:3px solid var(--wood);border-radius:12px;padding:5px 10px;font-weight:900;white-space:nowrap;font-size:15px}
+
+/* Mapa */
+.map svg{width:100%;height:auto;display:block}
+.isl{cursor:pointer}
+.isl:active{opacity:.8}
+.isl-name{font-family:"Pirata One";font-size:22px;fill:var(--ink)}
+.bob{animation:bob 2.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px) rotate(-3deg)}}
+.mapsea{fill:url(#seaGrad)}
+
+/* Navegación inferior */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--ink);display:flex;justify-content:center;
+  padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+.tabs button{flex:1;max-width:150px;font:inherit;font-weight:800;font-size:12px;color:var(--straw);background:none;border:0;padding:6px 2px;border-radius:12px;cursor:pointer}
+.tabs button span{display:block;font-size:24px}
+.tabs button.on{background:rgba(242,201,76,.18)}
+
+/* Juego */
+.bar{flex:1;height:16px;background:rgba(255,255,255,.6);border-radius:10px;overflow:hidden;border:2px solid var(--wood)}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--red));transition:width .3s}
+.bar.time i{background:linear-gradient(90deg,var(--green),var(--gold));transition:width .1s linear}
+.tag{display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:var(--straw);border-radius:999px;padding:4px 12px;font-weight:800;font-size:14px}
+.q-title{font-size:21px;font-weight:900;margin:12px 0 6px}
+.q-sentence{font-size:22px;font-weight:800;background:#fff;border-radius:14px;padding:12px 14px;margin:8px 0 12px;border:2px dashed var(--wood)}
+.opts{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.opts.one{grid-template-columns:1fr}
+.opt{font:inherit;font-size:19px;font-weight:800;background:#fff;border:3px solid #d9c18a;border-radius:14px;padding:13px 10px;cursor:pointer;color:var(--ink);min-height:56px}
+.opt.ok{background:#d6f5e2;border-color:var(--green);color:#16683b}
+.opt.ko{background:#ffe0e3;border-color:var(--red);color:#9b1020}
+.feedback{font-weight:900;font-size:20px;margin-top:10px;min-height:28px;text-align:center}
+.feedback.ok{color:var(--green)} .feedback.ko{color:var(--red)}
+.video{display:block;background:#fff;border:3px solid var(--gold);border-radius:14px;padding:10px 14px;font-weight:900;color:var(--ink);text-decoration:none;margin:8px 0}
+
+/* Batalla */
+.arena{position:relative;height:150px;background:linear-gradient(180deg,#bde9ff,#1590c9);border-radius:16px;border:3px solid var(--wood);overflow:hidden;margin-top:12px}
+.arena .me{position:absolute;left:10px;bottom:8px;width:90px;text-align:center}
+.arena .boss{position:absolute;right:10px;bottom:4px;width:120px;text-align:center;transition:transform .2s}
+.arena .boss.hit{animation:hit .5s}
+@keyframes hit{20%{transform:translateX(18px) rotate(10deg)}60%{transform:translateX(-4px)}}
+.arena .me.hurt{animation:hurt .5s}
+@keyframes hurt{25%,75%{transform:translateX(-8px);filter:brightness(1.6) saturate(0)}50%{transform:translateX(8px)}}
+.arm{position:absolute;left:70px;bottom:62px;height:16px;width:0;background:#f4c7a1;border:3px solid #b9784d;border-radius:8px;transform-origin:left}
+.arm.go{animation:arm .6s ease-out}
+.arm::after{content:"";position:absolute;right:-22px;top:-12px;width:34px;height:34px;border-radius:50%;background:#f4c7a1;border:3px solid #b9784d}
+@keyframes arm{0%{width:0}45%{width:calc(100% - 200px)}100%{width:0}}
+.hp{height:10px;background:#fff;border-radius:6px;overflow:hidden;border:2px solid var(--ink);margin-top:4px}
+.hp i{display:block;height:100%;background:var(--red);transition:width .3s}
+.meat{font-size:18px;letter-spacing:-2px}
+.bang{position:absolute;right:90px;top:20px;font-family:"Pirata One";font-size:34px;color:var(--red);text-shadow:2px 2px 0 #fff;opacity:0}
+.bang.go{animation:bang .7s}
+@keyframes bang{30%{opacity:1;transform:scale(1.3)}100%{opacity:0;transform:scale(1)}}
+
+/* Tesoros */
+.poster{width:200px;margin:0 auto;background:#f3d9a0;border:6px solid #b8864b;padding:10px;box-shadow:0 6px 18px rgba(0,0,0,.3);transform:rotate(-2deg)}
+.poster .wanted{font-family:"Pirata One";font-size:40px;line-height:1;text-align:center}
+.poster .name{font-family:"Pirata One";font-size:21px;text-align:center}
+.poster .berries{font-weight:900;font-size:19px;text-align:center}
+.album{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.sticker{background:#fff;border:3px solid #d9c18a;border-radius:16px;padding:8px 6px;text-align:center;font-weight:900;font-size:14px}
+.sticker svg{width:64px;height:64px}
+.sticker.off svg{filter:grayscale(1) brightness(.35);opacity:.35}
+.sticker.off{background:#f3e6c4}
+.sticker .cond{font-weight:700;font-size:11px;opacity:.75}
+.ticket{position:relative;background:repeating-linear-gradient(45deg,#ffe28a,#ffe28a 10px,#ffd34d 10px,#ffd34d 20px);border:3px dashed var(--red);border-radius:14px;padding:12px;margin-top:10px;font-weight:900}
+.ticket.used{filter:grayscale(1);opacity:.55}
+.medals{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;text-align:center;font-size:12px;font-weight:800}
+.medals div span{display:block;font-size:30px}
+.pieces{font-size:30px;letter-spacing:4px}
+
+/* Modales y animaciones */
+.modal{position:fixed;inset:0;z-index:50;background:rgba(11,35,60,.72);display:flex;align-items:center;justify-content:center;padding:20px}
+.modal .card{max-width:420px;width:100%;margin:0}
+.pop{animation:pop .6s}
+@keyframes pop{0%{transform:scale(.3) rotate(-12deg);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1)}}
+.spin-in{animation:spinin 1s}
+@keyframes spinin{0%{transform:rotate(-540deg) scale(0)}100%{transform:none}}
+.confetti{position:fixed;top:-30px;font-size:26px;z-index:60;animation:fall 2.6s linear forwards;pointer-events:none}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+#fx{position:fixed;inset:0;z-index:70;overflow:hidden;display:none;background:linear-gradient(180deg,#7fd3ff,#bde9ff 55%,#1590c9 56%,#0b4f8a)}
+#fx.on{display:block}
+#fx .cap{position:absolute;left:0;right:0;top:calc(14% + env(safe-area-inset-top));text-align:center;font-family:"Pirata One";font-size:44px;color:#fff;text-shadow:3px 3px 0 var(--red),0 0 18px rgba(0,0,0,.3);padding:0 12px}
+#fx .tapclose{position:absolute;left:0;right:0;bottom:calc(20px + env(safe-area-inset-bottom));text-align:center;color:#fff;font-weight:900;opacity:.85}
+.fx-ship{position:absolute;bottom:34%;left:-260px;width:240px;animation:sail 5s linear forwards}
+.fx-ship svg{animation:bob 1.2s ease-in-out infinite}
+@keyframes sail{to{left:110vw}}
+.fx-waves{position:absolute;left:0;bottom:0;width:200%;height:46%;animation:wave 6s linear infinite}
+@keyframes wave{to{transform:translateX(-50%)}}
+.fx-fist{position:absolute;top:52%;left:0;height:30px;width:0;background:#f4c7a1;border:4px solid #b9784d;border-radius:14px;animation:pistol 1.6s ease-in .4s forwards}
+.fx-fist::after{content:"";position:absolute;right:-40px;top:-22px;width:64px;height:64px;border-radius:50%;background:#f4c7a1;border:4px solid #b9784d}
+.fx-fist::before{content:"";position:absolute;left:-4px;top:-14px;width:70px;height:50px;background:var(--red);border-radius:10px}
+@keyframes pistol{60%{width:72vw}100%{width:72vw}}
+.fx-target{position:absolute;top:calc(52% - 40px);right:6vw;width:100px;animation:fly 1s ease-in 1.4s forwards}
+@keyframes fly{to{transform:translate(60vw,-70vh) rotate(900deg)}}
+.fx-chest{position:absolute;left:50%;top:42%;width:180px;margin-left:-90px;animation:pop .8s}
+.fx-hat{position:absolute;width:130px;animation:hatfly 4.6s ease-in-out forwards}
+@keyframes hatfly{0%{left:-150px;top:70%;transform:rotate(0)}25%{left:60vw;top:30%;transform:rotate(200deg)}50%{left:10vw;top:20%;transform:rotate(380deg)}75%{left:70vw;top:55%;transform:rotate(560deg)}100%{left:calc(50vw - 65px);top:40%;transform:rotate(720deg) scale(1.4)}}
+.fx-flag{position:absolute;left:50%;top:38%;width:220px;margin-left:-110px;animation:spinin 1.2s,flag 1.4s ease-in-out 1.2s infinite}
+@keyframes flag{50%{transform:skewY(6deg) scale(1.05)}}
+#fxCanvas{position:absolute;inset:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.wchip{font:inherit;font-weight:900;font-size:20px;padding:10px 14px;border-radius:12px;border:3px solid var(--wood);background:#fff;cursor:pointer;color:var(--ink)}
+.wchip.used{opacity:.25;pointer-events:none}
+.slots{display:flex;flex-wrap:wrap;gap:8px;min-height:60px;background:rgba(255,255,255,.6);border:3px dashed var(--wood);border-radius:14px;padding:8px}
+.slots.good{border-color:var(--green);background:#d6f5e2}.slots.bad{border-color:var(--red);background:#ffe0e3}
+.slot{background:var(--straw);border-radius:10px;padding:8px 12px;font-weight:900;font-size:19px;cursor:pointer}
+.slot:last-child{animation:pop .3s}
+.opt,.wchip,.btn{transition:transform .1s}
+.opt:active,.wchip:active{transform:scale(.94)}
+.opt.ok{animation:pop .5s}
+.parrot{display:flex;align-items:flex-end;gap:8px;margin-top:12px;position:relative}
+.parrot .bird{animation:bob 2s ease-in-out infinite;flex:none}
+.bubble{background:#fff;border:3px solid var(--wood);border-radius:18px 18px 18px 4px;padding:10px 14px;font-weight:900;font-size:17px;flex:1}
+.bubble.talk{animation:pop .45s}
+.combo{position:absolute;right:6px;top:-18px;background:var(--red);color:#fff;font-weight:900;border-radius:999px;padding:4px 10px;animation:pop .4s}
+.x2{margin-top:8px;text-align:center;background:linear-gradient(90deg,#f5b700,#ffe28a,#f5b700);border:3px solid #a87d00;border-radius:12px;font-weight:900;padding:4px}
+.sea-bonus{background:#fff4c9}
+.isl .islin{transition:transform .15s}
+.isl:active .islin{transform:scale(.9)}
+.flag{animation:flagw 1.6s ease-in-out infinite;transform-origin:22px -53px}
+@keyframes flagw{50%{transform:scaleX(.8)}}
+.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@media (max-width:420px){.opt{font-size:17px}.q-sentence{font-size:19px}#fx .cap{font-size:36px}}
+@media (prefers-reduced-motion:reduce){.bob,.fx-waves,.fx-flag{animation:none}}
+</style>
+</head>
+<body>
+
+<!-- Dibujos propios inspirados en One Piece (sin imágenes oficiales) -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="seaGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5fd0e8"/><stop offset="1" stop-color="#1a7fa8"/></linearGradient>
+    <symbol id="parrot" viewBox="0 0 100 100">
+      <path d="M40 92 L46 78 M56 92 L52 78" stroke="#f5b700" stroke-width="5" stroke-linecap="round"/>
+      <path d="M30 80 Q18 50 38 26 Q58 8 72 26 Q82 44 70 64 Q60 84 30 80Z" fill="#2ecc71" stroke="#1e8449" stroke-width="4"/>
+      <path d="M30 80 Q24 62 34 50 Q46 66 30 80Z" fill="#3498db"/>
+      <path d="M38 26 Q50 4 66 12 Q60 18 56 24Z" fill="#e74c3c"/>
+      <circle cx="60" cy="34" r="8" fill="#fff"/><circle cx="62" cy="34" r="4" fill="#111"/>
+      <path d="M70 38 Q90 40 82 56 Q76 48 68 48Z" fill="#f5b700" stroke="#b8860b" stroke-width="3"/>
+      <ellipse cx="54" cy="18" rx="22" ry="5" fill="#f2c94c" stroke="#b8862a" stroke-width="2"/>
+      <path d="M40 18 Q42 4 54 4 Q66 4 68 18Z" fill="#f2c94c" stroke="#b8862a" stroke-width="2"/><path d="M40 15 Q54 19 68 15 L68 18 Q54 22 40 18Z" fill="#d7263d"/>
+    </symbol>
+    <linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4fb3e8"/><stop offset="1" stop-color="#0b4f8a"/></linearGradient>
+    <symbol id="jolly" viewBox="0 0 200 200">
+      <circle cx="100" cy="100" r="96" fill="#111"/>
+      <path d="M52 150 L148 70 M52 70 L148 150" stroke="#fff" stroke-width="16" stroke-linecap="round"/>
+      <circle cx="52" cy="70" r="11" fill="#fff"/><circle cx="148" cy="70" r="11" fill="#fff"/>
+      <circle cx="52" cy="150" r="11" fill="#fff"/><circle cx="148" cy="150" r="11" fill="#fff"/>
+      <ellipse cx="100" cy="108" rx="40" ry="36" fill="#fff"/>
+      <rect x="80" y="128" width="40" height="22" rx="6" fill="#fff"/>
+      <ellipse cx="85" cy="108" rx="10" ry="12" fill="#111"/><ellipse cx="115" cy="108" rx="10" ry="12" fill="#111"/>
+      <path d="M96 124 L100 117 L104 124Z" fill="#111"/>
+      <path d="M88 138 v10 M100 138 v10 M112 138 v10" stroke="#111" stroke-width="3"/>
+      <ellipse cx="100" cy="80" rx="66" ry="13" fill="#f2c94c" stroke="#b8862a" stroke-width="3"/>
+      <path d="M62 80 Q64 40 100 38 Q136 40 138 80Z" fill="#f2c94c" stroke="#b8862a" stroke-width="3"/>
+      <path d="M63 72 Q100 82 137 72 L138 80 Q100 90 62 80Z" fill="#d7263d"/>
+    </symbol>
+    <symbol id="hat" viewBox="0 0 200 110">
+      <ellipse cx="100" cy="80" rx="95" ry="24" fill="#f2c94c" stroke="#b8862a" stroke-width="4"/>
+      <path d="M45 78 Q48 14 100 12 Q152 14 155 78Z" fill="#f2c94c" stroke="#b8862a" stroke-width="4"/>
+      <path d="M46 64 Q100 78 154 64 L155 78 Q100 92 45 78Z" fill="#d7263d"/>
+      <path d="M70 30 Q100 22 130 30" stroke="#b8862a" stroke-width="2" fill="none" opacity=".6"/>
+    </symbol>
+    <symbol id="ship" viewBox="0 0 240 200">
+      <path d="M118 20 V140" stroke="#5d3a17" stroke-width="7"/>
+      <path d="M58 38 Q118 25 178 38 L172 118 Q118 108 64 118Z" fill="#fff" stroke="#c9b27a" stroke-width="3"/>
+      <use href="#jolly" x="88" y="48" width="60" height="60"/>
+      <path d="M118 8 l32 9 -32 9z" fill="#111"/>
+      <path d="M20 140 H220 Q205 188 120 188 Q35 188 20 140Z" fill="#d4a15a" stroke="#8a5a2b" stroke-width="4"/>
+      <path d="M30 152 H210" stroke="#8a5a2b" stroke-width="3"/>
+      <circle cx="210" cy="132" r="18" fill="#fff" stroke="#8a5a2b" stroke-width="4"/>
+      <circle cx="205" cy="128" r="3" fill="#111"/><circle cx="215" cy="128" r="3" fill="#111"/>
+    </symbol>
+    <symbol id="fruit" viewBox="0 0 120 130">
+      <path d="M60 22 Q72 2 92 8" stroke="#2a7d3c" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M62 18 Q82 0 98 22 Q78 26 62 18Z" fill="#3fbf5f"/>
+      <circle cx="60" cy="74" r="48" fill="#8e44ad"/>
+      <path d="M30 60 q10 -14 20 0 q10 14 20 0 q10 -14 20 0 M24 82 q10 -14 20 0 q10 14 20 0 q10 -14 20 0 q6 -8 12 -4 M36 104 q10 -12 20 0 q10 12 20 0 q8 -10 14 -4"
+            stroke="#c39bd3" stroke-width="5" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="chest" viewBox="0 0 160 130">
+      <circle cx="40" cy="38" r="12" fill="#f5b700"/><circle cx="75" cy="30" r="14" fill="#ffd34d"/><circle cx="112" cy="36" r="12" fill="#f5b700"/>
+      <path d="M14 50 Q80 10 146 50 V70 H14Z" fill="#a0522d" stroke="#5d3a17" stroke-width="4"/>
+      <rect x="14" y="68" width="132" height="56" rx="6" fill="#b5652f" stroke="#5d3a17" stroke-width="4"/>
+      <rect x="66" y="62" width="28" height="30" rx="4" fill="#f5b700" stroke="#5d3a17" stroke-width="3"/>
+      <path d="M14 96 H146" stroke="#5d3a17" stroke-width="3"/>
+    </symbol>
+    <symbol id="swords" viewBox="0 0 140 140">
+      <g stroke-linecap="round">
+        <path d="M20 120 L120 20" stroke="#cfd8dc" stroke-width="8"/><path d="M28 98 L42 112" stroke="#2a9d5b" stroke-width="10"/>
+        <path d="M120 120 L20 20" stroke="#cfd8dc" stroke-width="8"/><path d="M112 98 L98 112" stroke="#fff" stroke-width="10"/>
+        <path d="M70 130 L70 10" stroke="#cfd8dc" stroke-width="8"/><path d="M60 112 H80" stroke="#d7263d" stroke-width="10"/>
+      </g>
+    </symbol>
+    <symbol id="map" viewBox="0 0 140 110">
+      <path d="M8 14 L48 4 L92 14 L132 4 V96 L92 106 L48 96 L8 106Z" fill="#fbe9b7" stroke="#8a5a2b" stroke-width="4"/>
+      <path d="M48 4 V96 M92 14 V106" stroke="#d9c18a" stroke-width="3"/>
+      <path d="M22 80 Q40 50 60 66 T104 40" stroke="#d7263d" stroke-width="4" fill="none" stroke-dasharray="6 6"/>
+      <path d="M100 30 l12 12 M112 30 l-12 12" stroke="#d7263d" stroke-width="5" stroke-linecap="round"/>
+    </symbol>
+    <!-- Emblemas de la tripulación (álbum de cromos) -->
+    <symbol id="st-nami" viewBox="0 0 120 120">
+      <circle cx="60" cy="66" r="42" fill="#f39c12" stroke="#c0700a" stroke-width="4"/>
+      <circle cx="48" cy="54" r="8" fill="#ffd08a" opacity=".7"/>
+      <path d="M60 26 Q62 12 74 8" stroke="#2a7d3c" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M62 22 Q86 6 98 24 Q80 32 62 22Z" fill="#3fbf5f"/>
+    </symbol>
+    <symbol id="st-usopp" viewBox="0 0 120 120">
+      <path d="M60 112 V66 M60 66 L30 22 M60 66 L90 22" stroke="#8a5a2b" stroke-width="12" stroke-linecap="round" fill="none"/>
+      <path d="M30 22 Q60 56 90 22" stroke="#d7263d" stroke-width="4" fill="none"/>
+      <circle cx="60" cy="46" r="9" fill="#2a9d5b"/>
+    </symbol>
+    <symbol id="st-sanji" viewBox="0 0 120 120">
+      <circle cx="52" cy="66" r="38" fill="#333" stroke="#111" stroke-width="4"/>
+      <path d="M86 58 L116 44" stroke="#111" stroke-width="10" stroke-linecap="round"/>
+      <path d="M30 66 Q34 44 54 46 Q74 48 72 68 Q70 86 50 84 Q30 84 30 66Z" fill="#fff"/>
+      <circle cx="52" cy="66" r="10" fill="#f5b700"/>
+    </symbol>
+    <symbol id="st-chopper" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="96" rx="52" ry="14" fill="#e86aa6" stroke="#a83a72" stroke-width="4"/>
+      <path d="M26 92 Q22 22 60 18 Q98 22 94 92Z" fill="#ff8cc6" stroke="#a83a72" stroke-width="4"/>
+      <path d="M50 46 H70 M60 36 V56" stroke="#fff" stroke-width="10" stroke-linecap="round" transform="rotate(45 60 46)"/>
+      <path d="M26 80 Q60 90 94 80" stroke="#a83a72" stroke-width="3" fill="none"/>
+    </symbol>
+    <symbol id="st-robin" viewBox="0 0 120 120">
+      <path d="M10 40 Q35 30 60 42 Q85 30 110 40 V100 Q85 90 60 102 Q35 90 10 100Z" fill="#fff" stroke="#6b4b8a" stroke-width="4"/>
+      <path d="M60 42 V102" stroke="#6b4b8a" stroke-width="3"/>
+      <g transform="translate(60 26)"><circle r="7" fill="#f5b700"/><g fill="#9b59b6"><circle cx="0" cy="-13" r="8"/><circle cx="12" cy="-4" r="8"/><circle cx="8" cy="11" r="8"/><circle cx="-8" cy="11" r="8"/><circle cx="-12" cy="-4" r="8"/></g><circle r="6" fill="#f5b700"/></g>
+    </symbol>
+    <symbol id="st-franky" viewBox="0 0 120 120">
+      <path d="M60 8 L74 44 L112 46 L82 70 L92 108 L60 86 L28 108 L38 70 L8 46 L46 44Z" fill="#2f86d9" stroke="#174f86" stroke-width="5" stroke-linejoin="round"/>
+      <text x="60" y="72" text-anchor="middle" font-family="Arial Black,Arial" font-weight="900" font-size="15" fill="#fff">SUPER</text>
+    </symbol>
+    <symbol id="st-brook" viewBox="0 0 120 120">
+      <circle cx="60" cy="54" r="48" fill="#111"/>
+      <ellipse cx="60" cy="70" rx="26" ry="28" fill="#fff"/>
+      <ellipse cx="50" cy="66" rx="7" ry="9" fill="#111"/><ellipse cx="70" cy="66" rx="7" ry="9" fill="#111"/>
+      <path d="M50 88 v8 M60 88 v8 M70 88 v8" stroke="#111" stroke-width="3"/>
+      <text x="100" y="112" font-size="28">♪</text>
+    </symbol>
+    <symbol id="st-jinbe" viewBox="0 0 120 120">
+      <path d="M6 76 Q22 56 38 76 T70 76 T102 76 T118 70 V114 H6Z" fill="#1590c9"/>
+      <path d="M30 50 Q60 20 92 46 Q60 70 30 50Z" fill="#17a589" stroke="#0e6655" stroke-width="4"/>
+      <path d="M92 46 L112 30 L108 60Z" fill="#17a589" stroke="#0e6655" stroke-width="4"/>
+      <circle cx="44" cy="44" r="4" fill="#111"/>
+    </symbol>
+    <symbol id="monster" viewBox="0 0 140 140">
+      <path d="M20 130 Q14 96 30 90 M48 132 Q42 104 52 96 M92 132 Q98 104 88 96 M120 130 Q126 96 110 90" stroke="currentColor" stroke-width="12" fill="none" stroke-linecap="round"/>
+      <path d="M22 92 Q16 20 70 14 Q124 20 118 92 Q70 108 22 92Z" fill="currentColor" stroke="#2b1a10" stroke-width="4"/>
+      <ellipse cx="52" cy="56" rx="13" ry="15" fill="#fff"/><ellipse cx="88" cy="56" rx="13" ry="15" fill="#fff"/>
+      <circle cx="55" cy="59" r="6" fill="#111"/><circle cx="85" cy="59" r="6" fill="#111"/>
+      <path d="M40 38 L64 46 M100 38 L76 46" stroke="#2b1a10" stroke-width="5" stroke-linecap="round"/>
+      <path d="M50 82 Q70 70 90 82" stroke="#2b1a10" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M58 77 l4 8 4 -7 M74 77 l4 8 4 -8" fill="#fff"/>
+    </symbol>
+    <symbol id="marine" viewBox="0 0 120 120">
+      <circle cx="60" cy="60" r="54" fill="#fff" stroke="#1f4e9c" stroke-width="8"/>
+      <path d="M60 22 V96 M38 40 H82 M30 80 Q60 104 90 80" stroke="#1f4e9c" stroke-width="8" fill="none" stroke-linecap="round"/>
+      <text x="60" y="70" text-anchor="middle" font-family="Arial Black,Arial" font-size="16" fill="#1f4e9c">MARINE</text>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="wrap" id="app"></div>
+<nav class="tabs" id="tabs">
+  <button data-t="map" onclick="go('map')"><span>🗺️</span>Mapa</button>
+  <button data-t="treasure" onclick="go('treasure')"><span>💰</span>Tesoros</button>
+  <button data-t="cine" onclick="go('cine')"><span>🎬</span>Cine</button>
+  <button data-t="family" onclick="go('family')"><span>🔒</span>Familia</button>
+</nav>
+<div id="fx" onclick="closeFx()"></div>
+<div id="modalRoot"></div>
+
+<script>
+// ==================================================================
+// MATERIAS (islas) Y BANCOS DE PREGUNTAS
+//   q: enunciado · s: frase de apoyo (opcional) · o: opciones · a: correcta
+//   v: vídeo en inglés {t, url} (solo Inglés)
+// ==================================================================
+const SUBJ = {
+  cat: {zone:"school", name:"Illa del Català",      short:"Català",     emoji:"📕", color:"#d7263d", boss:"El Pop de les Faltes",  bossColor:"#c0392b"},
+  cas: {zone:"school", name:"Isla del Castellano",  short:"Castellano", emoji:"📘", color:"#1f6fd1", boss:"El Kraken Gramatical",  bossColor:"#2e86c1"},
+  mat: {zone:"bonus", name:"Isla de los Números",  short:"Mates",      emoji:"✖️", color:"#2a9d5b", boss:"El Rey Multiplicón",    bossColor:"#27ae60"},
+  gen: {zone:"bonus", name:"Isla del Saber",       short:"Cultura",    emoji:"🌍", color:"#e07a12", boss:"El Almirante Preguntón",bossColor:"#d35400"},
+  eng: {zone:"bonus", name:"English Island",       short:"Inglés",     emoji:"🔤", color:"#8e44ad", boss:"Captain Grammar",       bossColor:"#8e44ad"},
+};
+
+const T_CAT = ["Enunciativa","Interrogativa","Exclamativa","Imperativa"];
+const GEN_CAT = ["masculí singular","femení singular","masculí plural","femení plural"];
+const T_CAS = ["Declarativa","Interrogativa","Exclamativa","Imperativa"];
+const ANIM = ["Doméstico","Marino","Insecto"];
+
+const BANK = {
+  // ---- Català (examen 1: fitxa T-1 i T-2)
+  cat: [
+    {q:"Quina paraula va PRIMER en el diccionari?", o:["pera","flam","girafa","nas"], a:"flam"},
+    {q:"Quina paraula va PRIMER en el diccionari?", o:["vaixell","barret","tresor","mapa"], a:"barret"},
+    {q:"Quina paraula va ÚLTIMA en el diccionari?", o:["illa","pirata","tresor","vaixell"], a:"vaixell"},
+    {q:"Quin nom va PRIMER per ordre alfabètic?", o:["Sanji","Chopper","Luffy","Usopp"], a:"Chopper"},
+    {q:"Quin és el SUBJECTE?", s:"El Luffy menja molta carn.", o:["El Luffy","menja molta carn","molta carn"], a:"El Luffy"},
+    {q:"Quin és el SUBJECTE? (sencer!)", s:"Aquells pirates naveguen molt de pressa.", o:["pirates","Aquells pirates","naveguen molt de pressa"], a:"Aquells pirates"},
+    {q:"Quin és el SUBJECTE? (no sempre és al principi!)", s:"Cada matí la Nami dibuixa mapes.", o:["Cada matí","la Nami","dibuixa mapes"], a:"la Nami"},
+    {q:"Quin és el SUBJECTE?", s:"El cuiner del vaixell prepara un pastís.", o:["El cuiner","El cuiner del vaixell","prepara un pastís"], a:"El cuiner del vaixell"},
+    {q:"Quin és el PREDICAT?", s:"La Robin llegeix un llibre antic.", o:["La Robin","llegeix un llibre antic","un llibre antic"], a:"llegeix un llibre antic"},
+    {q:"Quin és el PREDICAT?", s:"El meu germà va anar al parc.", o:["El meu germà","va anar al parc","el parc"], a:"va anar al parc"},
+    {q:"Completa amb el SUBJECTE:", s:"______ beu un got de llet ben freda.", o:["El Chopper","corre molt","ben de pressa"], a:"El Chopper"},
+    {q:"Quin tipus d'oració és?", s:"Quin tresor tan gran!", o:T_CAT, a:"Exclamativa"},
+    {q:"Quin tipus d'oració és?", s:"On és el vaixell?", o:T_CAT, a:"Interrogativa"},
+    {q:"Quin tipus d'oració és?", s:"Puja al vaixell ara mateix.", o:T_CAT, a:"Imperativa"},
+    {q:"Quin tipus d'oració és?", s:"El Zoro té tres espases.", o:T_CAT, a:"Enunciativa"},
+    {q:"Quina està ben escrita EN CATALÀ? (els signes!)", o:["¡Fa molt de fred!","Fa molt de fred!","¿Fa molt de fred!"], a:"Fa molt de fred!"},
+    {q:"Quina està ben escrita EN CATALÀ?", o:["¿On vas?","On vas?","On vas¿"], a:"On vas?"},
+    {q:"Gènere i nombre de:", s:"espasa", o:GEN_CAT, a:"femení singular"},
+    {q:"Gènere i nombre de:", s:"tresors", o:GEN_CAT, a:"masculí plural"},
+    {q:"Gènere i nombre de:", s:"illes", o:GEN_CAT, a:"femení plural"},
+    {q:"Gènere i nombre de:", s:"vaixell", o:GEN_CAT, a:"masculí singular"},
+    {q:"Quin és el plural de «peix»?", o:["peixs","peixos","peixes"], a:"peixos"},
+    {q:"Quin és el femení de «cuiner»?", o:["cuinera","cuinéra","cuinerra"], a:"cuinera"},
+    {q:"Quin és un NOM PROPI?", o:["cadira","Girona","llibre","motxilla"], a:"Girona"},
+    {q:"Nom propi o nom comú?", s:"mestra", o:["Nom propi","Nom comú"], a:"Nom comú"},
+    {q:"Quina frase està ben escrita?", o:["el Luffy viu a la illa.","El luffy viu a l'illa.","El Luffy viu a l'illa."], a:"El Luffy viu a l'illa."},
+    {q:"Com s'escriu?", s:"Els conills corren molt de ______.", o:["preza","pressa","presa"], a:"pressa"},
+    {q:"Com s'escriu correctament?", o:["paisage","paisatge","paissatge"], a:"paisatge"},
+    {q:"Com s'escriu correctament?", o:["llapis","llàpis","yapis"], a:"llapis"},
+    {q:"Com s'escriu correctament?", o:["mestre","mertre","mesttre"], a:"mestre"},
+    {t:"order", q:"Ordena per ordre alfabètic:", w:["barret","illa","mapa","pirata","tresor"]},
+    {t:"order", q:"Ordena la tripulació per ordre alfabètic:", w:["Chopper","Luffy","Nami","Sanji","Zoro"]},
+    {t:"order", q:"Forma la frase (comença pel subjecte):", w:["La","Nami","dibuixa","un","mapa"]},
+    {t:"order", q:"Forma la frase:", w:["El","Zoro","té","tres","espases"]},
+  ],
+  // ---- Castellano (examen 2: ficha repaso T-1, 24/10/26)
+  cas: [
+    {q:"¿Con B o con V?", s:"ár_ol", o:["B","V"], a:"B"},
+    {q:"¿Con B o con V?", s:"fa_or", o:["B","V"], a:"V"},
+    {q:"¿Con B o con V?", s:"lla_e", o:["B","V"], a:"V"},
+    {q:"¿Con B o con V?", s:"po_re", o:["B","V"], a:"B"},
+    {q:"¿Con B o con V?", s:"de_er", o:["B","V"], a:"B"},
+    {q:"¿Con B o con V?", s:"vi_ir", o:["B","V"], a:"V"},
+    {q:"¿Con B o con V?", s:"_arco", o:["B","V"], a:"B"},
+    {q:"¿Con B o con V?", s:"na_egar", o:["B","V"], a:"V"},
+    {q:"¿Con B o con V?", s:"_otín", o:["B","V"], a:"B"},
+    {q:"¿Con B o con V?", s:"_iento", o:["B","V"], a:"V"},
+    {q:"Antes de B va M. ¿Cuál está bien?", o:["canbio","cambio","camvio"], a:"cambio"},
+    {q:"¿Qué frase está bien escrita?", o:["Luffy no sabe nadar vien.","Luffy no save nadar bien.","Luffy no sabe nadar bien."], a:"Luffy no sabe nadar bien."},
+    {q:"¿Qué frase está en PASADO?", o:["Luffy come mucha carne.","Luffy comió mucha carne.","Luffy comerá mucha carne."], a:"Luffy comió mucha carne."},
+    {q:"Pasa a pasado:", s:"Óscar y su hermano pintan un cuadro.", o:["…pintarán un cuadro.","…pinta un cuadro.","…pintaron un cuadro."], a:"…pintaron un cuadro."},
+    {q:"El pasado de «yo miro» lleva tilde:", o:["Yo mire","Yo miré","Yo míre"], a:"Yo miré"},
+    {q:"¡Ojo, que es castellano! Completa:", s:"Mis compañeros ___ yo cocinamos.", o:["i","y","e"], a:"y"},
+    {q:"¿Cómo se dice «nosotros cocinamos» como «yo miraba»?", o:["cocinabamos","cocinábamos","cocinaremos"], a:"cocinábamos"},
+    {q:"Pasado de «Elena marca un gol»:", o:["Elena marcó un gol.","Elena marcará un gol.","Elena marca un gol."], a:"Elena marcó un gol."},
+    {q:"¿Qué palabra NO es del mismo campo semántico?", s:"ancla – vela – mástil – plátano – timón", o:["ancla","vela","plátano","timón"], a:"plátano"},
+    {q:"¿Qué palabra NO es del mismo campo semántico?", s:"cuchara – tenedor – zapatilla – vaso", o:["cuchara","tenedor","zapatilla","vaso"], a:"zapatilla"},
+    {q:"¿Cuál NO es una profesión?", s:"cocinero – médico – panadería – músico", o:["cocinero","médico","panadería","músico"], a:"panadería"},
+    {q:"¿Cuál es una VERDURA?", o:["fresa","lechuga","melocotón","uva"], a:"lechuga"},
+    {q:"¿Qué palabra NO es del mismo campo semántico?", s:"coche – avión – zapato – tren", o:["coche","avión","zapato","tren"], a:"zapato"},
+    {q:"¿En qué grupo va?", s:"pez payaso", o:ANIM, a:"Marino"},
+    {q:"¿En qué grupo va?", s:"cobaya", o:ANIM, a:"Doméstico"},
+    {q:"¿En qué grupo va?", s:"libélula", o:ANIM, a:"Insecto"},
+    {q:"¿En qué grupo va?", s:"medusa", o:ANIM, a:"Marino"},
+    {q:"¿En qué grupo va?", s:"canario", o:ANIM, a:"Doméstico"},
+    {q:"¿En qué grupo va?", s:"grillo", o:ANIM, a:"Insecto"},
+    {q:"¿Cómo se escribe?", o:["calbaya","covaya","cobaya"], a:"cobaya"},
+    {q:"¿Qué tipo de oración es?", s:"¡Qué barco tan bonito!", o:T_CAS, a:"Exclamativa"},
+    {q:"¿Qué tipo de oración es?", s:"¿Dónde está el tesoro?", o:T_CAS, a:"Interrogativa"},
+    {q:"¿Qué tipo de oración es?", s:"Chopper es el médico del barco.", o:T_CAS, a:"Declarativa"},
+    {q:"¿Qué tipo de oración es?", s:"¡No toques la fruta del diablo!", o:T_CAS, a:"Imperativa"},
+    {q:"¿Qué tipo de oración es?", s:"No hagas ruido en la biblioteca.", o:T_CAS, a:"Imperativa"},
+    {q:"¿Cuál está bien EN CASTELLANO?", o:["Qué hambre tengo!","¡Qué hambre tengo!","¡Qué hambre tengo¡"], a:"¡Qué hambre tengo!"},
+    {q:"¿Cómo se escribe?", o:["declarativea","declaratiba","declarativa"], a:"declarativa"},
+    {q:"¿Cuál es el SUJETO?", s:"Aquel pirata pequeño perdió su sombrero.", o:["pirata","Aquel pirata pequeño","perdió su sombrero"], a:"Aquel pirata pequeño"},
+    {q:"¿Cuál es el PREDICADO?", s:"Nami llegó muy temprano al puerto.", o:["Nami","al puerto","llegó muy temprano al puerto"], a:"llegó muy temprano al puerto"},
+    {q:"¿Cuál es el SUJETO?", s:"El gato de mi prima duerme en el sofá.", o:["El gato","El gato de mi prima","duerme en el sofá"], a:"El gato de mi prima"},
+    {q:"¿Cuál es el SUJETO?", s:"Los viernes mi madre prepara la cena.", o:["Los viernes","mi madre","prepara la cena"], a:"mi madre"},
+    {t:"order", q:"Forma la frase en PASADO:", w:["Zoro","entrenó","con","sus","tres","espadas"]},
+    {t:"order", q:"Forma la frase en PASADO:", w:["Luffy","comió","mucha","carne","ayer"]},
+    {t:"order", q:"Forma la pregunta:", w:["¿Dónde","está","el","tesoro?"]},
+    {t:"order", q:"Forma la frase exclamativa:", w:["¡Qué","barco","tan","bonito!"]},
+  ],
+  mat: [], // se generan al vuelo (genMat)
+  // ---- Cultura general (del Mapa del Saber + nuevas)
+  gen: [
+    {q:"¿En qué continente está Egipto?", o:["Asia","África","Europa","Oceanía"], a:"África"},
+    {q:"¿Cuántos huesos tiene aproximadamente un adulto?", o:["106","156","206","256"], a:"206"},
+    {q:"¿Cuál es el océano más grande del mundo?", o:["Atlántico","Índico","Ártico","Pacífico"], a:"Pacífico"},
+    {q:"¿Qué gas necesitamos respirar para vivir?", o:["Dióxido de carbono","Oxígeno","Nitrógeno","Helio"], a:"Oxígeno"},
+    {q:"¿Cuántos lados tiene un hexágono?", o:["5","6","7","8"], a:"6"},
+    {q:"¿Cómo fabrican las plantas su alimento?", o:["Respiración","Digestión","Fotosíntesis","Evaporación"], a:"Fotosíntesis"},
+    {q:"¿Cuál es el país más grande del mundo?", o:["China","Canadá","Rusia","Brasil"], a:"Rusia"},
+    {q:"¿Cuántas patas tiene un insecto?", o:["4","6","8","10"], a:"6"},
+    {q:"¿Con qué se mide la temperatura?", o:["Barómetro","Termómetro","Balanza","Regla"], a:"Termómetro"},
+    {q:"¿Cuál es el hueso más largo del cuerpo?", o:["Fémur","Húmero","Tibia","Costilla"], a:"Fémur"},
+    {q:"¿Cuál es el río más largo del mundo?", o:["Amazonas","Nilo","Misisipi","Danubio"], a:"Nilo"},
+    {q:"¿Cuántos planetas hay en el sistema solar?", o:["7","8","9","10"], a:"8"},
+    {q:"¿Cuál es la capital de España?", o:["Barcelona","Sevilla","Madrid","Valencia"], a:"Madrid"},
+    {q:"¿Qué planeta está más cerca del Sol?", o:["Venus","Mercurio","Marte","Tierra"], a:"Mercurio"},
+    {q:"¿Cuál es el animal más grande del mundo?", o:["Elefante","Tiburón blanco","Ballena azul","Jirafa"], a:"Ballena azul"},
+    {q:"¿Cuál es el «planeta rojo»?", o:["Júpiter","Marte","Saturno","Neptuno"], a:"Marte"},
+    {q:"¿Cuántos minutos tiene una hora?", o:["30","60","100","24"], a:"60"},
+    {q:"¿En qué mar están las Islas Baleares?", o:["Cantábrico","Mediterráneo","Mar del Norte","Caribe"], a:"Mediterráneo"},
+    {q:"¿Qué brújula señala siempre hacia...?", o:["el Sur","el Norte","el Este","el mar"], a:"el Norte"},
+    {q:"¿Qué estado del agua es el hielo?", o:["Líquido","Gaseoso","Sólido"], a:"Sólido"},
+  ],
+  // ---- Inglés (del Mapa del Saber + nuevas + vídeos)
+  eng: [
+    {q:"¿Cómo se dice «Buenos días, ¿cómo estás?»?", o:["Good night, see you soon","Good morning, how are you?","Good afternoon, goodbye","Good morning, thank you"], a:"Good morning, how are you?"},
+    {q:"¿Qué significa «I am hungry»?", o:["Tengo sueño","Tengo miedo","Tengo hambre","Tengo frío"], a:"Tengo hambre"},
+    {q:"¿Cómo se dice «Me gusta jugar al fútbol»?", o:["I like playing football","I want to eat pizza","I am playing now","I like reading books"], a:"I like playing football"},
+    {q:"¿Qué significa «See you tomorrow»?", o:["Nos vemos mañana","Hasta luego, amigo","Buenas noches","Nos vemos el lunes"], a:"Nos vemos mañana"},
+    {q:"¿Cómo se dice «¿Puedo ir al baño?»?", o:["Can I go to the bathroom?","Where is the kitchen?","Can I have some water?","I need to sleep now"], a:"Can I go to the bathroom?"},
+    {q:"¿Qué significa «It is raining today»?", o:["Hace sol hoy","Está lloviendo hoy","Hace frío hoy","Está nevando hoy"], a:"Está lloviendo hoy"},
+    {q:"¿Cómo se dice «Feliz cumpleaños»?", o:["Happy new year","Good luck","Happy birthday","Congratulations"], a:"Happy birthday"},
+    {q:"¿Qué significa «I do not know»?", o:["No lo sé","No lo tengo","No lo quiero","No lo veo"], a:"No lo sé"},
+    {q:"Completa:", s:"I ___ to school every day.", o:["go","goes","going","went"], a:"go"},
+    {q:"Completa:", s:"She ___ a cat.", o:["have","has","having","had"], a:"has"},
+    {q:"¿Cómo se dice «Hace mucho calor»?", o:["It's very cold","It's very windy","It's very hot","It's very cloudy"], a:"It's very hot"},
+    {q:"¿Qué significa «Where is the bathroom?»?", o:["¿Dónde está la cocina?","¿Dónde está el baño?","¿Dónde está mi mochila?","¿Dónde está el parque?"], a:"¿Dónde está el baño?"},
+    {q:"¿Cómo se dice «barco» en inglés?", o:["ship","sheep","shop","shoe"], a:"ship"},
+    {q:"¿Qué significa «treasure»?", o:["tesoro","tren","tortuga","trueno"], a:"tesoro"},
+    {q:"¿Cómo se dice «sombrero de paja»?", o:["straw hat","strong hat","star cap","straw bag"], a:"straw hat"},
+    {q:"¿Qué número es «seven»?", o:["6","7","11","70"], a:"7"},
+    {q:"¿Qué color es «yellow»?", o:["verde","amarillo","naranja","azul"], a:"amarillo"},
+    {q:"Completa:", s:"Luffy ___ a pirate.", o:["am","is","are","be"], a:"is"},
+    {q:"Mira el vídeo y responde: ¿qué pasó al final?", v:{t:"The Lion and the Mouse", url:"https://www.youtube.com/watch?v=s7H6HIRZlbY"},
+     o:["El león se comió al ratón","El ratón liberó al león de una trampa","Pelearon para siempre","El ratón se hizo amigo de un elefante"], a:"El ratón liberó al león de una trampa"},
+    {q:"Mira el vídeo y responde: ¿cuál es el mensaje?", v:{t:"The Ugly Duckling", url:"https://www.youtube.com/watch?v=0G7kiMzBg9o"},
+     o:["Hay que ser igual a los demás","Ser diferente no impide encontrar tu lugar","Los patos nunca cambian","El patito se quedó solo"], a:"Ser diferente no impide encontrar tu lugar"},
+    {q:"Mira el vídeo y responde: ¿qué hizo Ricitos de Oro?", v:{t:"Goldilocks and the Three Bears", url:"https://www.youtube.com/watch?v=Oaw-d3r_gIc"},
+     o:["Limpió la casa","Comió, se sentó y durmió sin permiso","Ayudó a cocinar","Se quedó a vivir allí"], a:"Comió, se sentó y durmió sin permiso"},
+  ],
+};
+
+// Multiplicaciones generadas (tablas del 2 al 10 + problemas piratas)
+const rnd = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+function genMat(){
+  const a = rnd(2,10), b = rnd(2,10), p = a*b, r = Math.random();
+  let q, s, ans;
+  if (r < .55){ q = "¿Cuánto es?"; s = `${a} × ${b} = ?`; ans = p; }
+  else if (r < .75){ q = "¿Qué número falta?"; s = `${a} × ? = ${p}`; ans = b; }
+  else {
+    const P = [
+      `Luffy come ${a} platos de carne al día. ¿Cuántos come en ${b} días?`,
+      `Zoro tiene ${a} cajas con ${b} espadas cada una. ¿Cuántas espadas hay?`,
+      `Nami dibuja ${b} mapas cada semana. ¿Cuántos dibuja en ${a} semanas?`,
+      `Hay ${a} barcos con ${b} piratas en cada uno. ¿Cuántos piratas hay?`,
+      `Sanji prepara ${a} bandejas con ${b} pasteles. ¿Cuántos pasteles hay?`,
+    ];
+    q = "Problema pirata:"; s = P[rnd(0,P.length-1)]; ans = p;
+  }
+  const opts = new Set([ans]);
+  const cand = r >= .55 && r < .75 ? [b+1,b-1,b+2,a] : [p+a,p-a,p+b,p-b,p+1,p-1,a+b];
+  for (const c of shuffle(cand)) { if (opts.size >= 4) break; if (c > 0) opts.add(c); }
+  return {q, s, o:[...opts].map(String), a:String(ans)};
+}
+
+// ==================================================================
+// PREMIOS
+// ==================================================================
+const RANKS = [
+  {b:0,          n:"Grumete"},
+  {b:100e6,      n:"Pirata novato"},
+  {b:300e6,      n:"Pirata temido"},
+  {b:600e6,      n:"Supernova"},
+  {b:1000e6,     n:"Capitán"},
+  {b:2000e6,     n:"Señor de la Guerra"},
+  {b:3500e6,     n:"Emperador del Mar"},
+  {b:5000e6,     n:"¡REY DE LOS PIRATAS!"},
+];
+const CREW = [
+  {id:"luffy",  name:"Luffy",   sym:"hat",       cond:"Juega tu primera partida",           ok:s=>s.games>=1},
+  {id:"zoro",   name:"Zoro",    sym:"swords",    cond:"Gana 3 batallas",                    ok:s=>sum(s.wins)>=3},
+  {id:"nami",   name:"Nami",    sym:"st-nami",   cond:"3⭐ en Castellano",                  ok:s=>(s.stars.cas||0)>=3},
+  {id:"usopp",  name:"Usopp",   sym:"st-usopp",  cond:"3⭐ en Català",                      ok:s=>(s.stars.cat||0)>=3},
+  {id:"sanji",  name:"Sanji",   sym:"st-sanji",  cond:"Acierta 100 preguntas",              ok:s=>s.totalOk>=100},
+  {id:"chopper",name:"Chopper", sym:"st-chopper",cond:"Cura 10 errores en Repaso",          ok:s=>s.fixed>=10},
+  {id:"robin",  name:"Robin",   sym:"st-robin",  cond:"Termina un examen",                  ok:s=>Object.keys(s.exams).length>=1},
+  {id:"franky", name:"Franky",  sym:"st-franky", cond:"15 aciertos en una contrarreloj",    ok:s=>Math.max(0,...Object.values(s.crono))>=15},
+  {id:"brook",  name:"Brook",   sym:"st-brook",  cond:"Juega 3 días seguidos",              ok:s=>s.streak.days>=3},
+  {id:"jinbe",  name:"Jinbe",   sym:"st-jinbe",  cond:"3⭐ en Inglés",                      ok:s=>(s.stars.eng||0)>=3},
+  {id:"sunny",  name:"El barco",sym:"ship",      cond:"3⭐ en Mates",                       ok:s=>(s.stars.mat||0)>=3},
+  {id:"sabio",  name:"Sabio",   sym:"map",       cond:"3⭐ en Cultura",                     ok:s=>(s.stars.gen||0)>=3},
+];
+const ANIMS = [
+  {id:"sail",   name:"El barco zarpa",          rank:0},
+  {id:"gomu",   name:"Puñetazo de goma",        rank:1},
+  {id:"coins",  name:"Lluvia de berries",       rank:2},
+  {id:"hat",    name:"El sombrero vuela",       rank:3},
+  {id:"fire",   name:"Fuegos artificiales",     rank:4},
+  {id:"king",   name:"La bandera del Rey",      rank:6},
+];
+const EXAMS = [
+  {key:"glds-examen-catala-1",     file:"examenes/catala-1.html",     name:"Examen Pirata de Català", sub:"Fitxa T-1 i T-2"},
+  {key:"glds-examen-castellano-1", file:"examenes/castellano-1.html", name:"Examen Pirata de Castellano", sub:"Ficha repaso T-1"},
+];
+const FAMILY_PIN = "2026";
+const PIECES_PER_TICKET = 4;
+
+// ==================================================================
+// ESTADO (guardado en el móvil)
+// ==================================================================
+const KEY = "glds-gran-line-1";
+const blank = () => ({berries:0, games:0, totalOk:0, fixed:0, pieces:0,
+  tickets:{earned:0, redeemed:[]}, stars:{}, crono:{}, wins:{}, stats:{}, wrong:{},
+  stickers:[], exams:{}, streak:{last:"", days:0}, lastIsland:"cat", sound:true, music:true, rank:0});
+let S = load();
+function load(){ try { const d = JSON.parse(localStorage.getItem(KEY)); if (d) return Object.assign(blank(), d); } catch(e){} return blank(); }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+
+const app = document.getElementById("app");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const sum = o => Object.values(o).reduce((a,b)=>a+b,0);
+function shuffle(a){ a = a.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+const icon = (id,w,h,cls="") => `<svg class="${cls}" width="${w}" height="${h}"><use href="#${id}"/></svg>`;
+function fmtB(n){ return n >= 1e9 ? (n/1e9).toFixed(n%1e9?1:0).replace(".",",")+" mil M" : Math.round(n/1e6)+" M"; }
+const rankIdx = b => RANKS.reduce((r,x,k)=> b>=x.b ? k : r, 0);
+const today = () => new Date().toLocaleDateString("sv");
+
+// ==================================================================
+// SONIDOS PIRATAS (sintetizados con Web Audio, sin archivos ni audios de la serie)
+// ==================================================================
+let AC = null, musicTimer = null, musicBus = null;
+function ac(){ AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === "suspended") AC.resume(); return AC; }
+function bus(){ const c = ac(); if (!musicBus){ musicBus = c.createGain(); musicBus.connect(c.destination); } return musicBus; }
+function tone(f, d, {type="triangle", vol=.18, at=0, slide=0, attack=.005, music=false}={}){
+  if (!S.sound) return;
+  try { const c = ac(), t = c.currentTime + at, o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + d);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + attack); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+    o.connect(g); g.connect(music ? bus() : c.destination); o.start(t); o.stop(t + d + .05); } catch(e){}
+}
+function noise(d, {vol=.4, at=0, freq=800}={}){
+  if (!S.sound) return;
+  try { const c = ac(), t = c.currentTime + at, buf = c.createBuffer(1, c.sampleRate*d, c.sampleRate), data = buf.getChannelData(0);
+    for (let i=0;i<data.length;i++) data[i] = (Math.random()*2-1) * (1 - i/data.length);
+    const src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    src.buffer = buf; f.type = "lowpass"; f.frequency.value = freq; g.gain.value = vol;
+    src.connect(f); f.connect(g); g.connect(c.destination); src.start(t); } catch(e){}
+}
+function beep(seq){ let t = 0; seq.forEach(([f,d]) => { tone(f, d, {at:t}); t += d*.8; }); }
+const sBell   = () => { tone(1320,1.2,{type:"sine",vol:.2}); tone(2640,.6,{type:"sine",vol:.06}); tone(1320,1,{type:"sine",vol:.12,at:.35}); };
+const sCoins  = () => { for (let k=0;k<5;k++) tone(1800 + Math.random()*900, .12, {type:"square", vol:.05, at:k*.06}); };
+const sCannon = () => { noise(.7,{vol:.9,freq:500}); tone(110,.5,{type:"sine",vol:.5,slide:40}); };
+const sSquawk = () => { tone(1500,.13,{type:"sawtooth",vol:.07,slide:700}); tone(1300,.16,{type:"sawtooth",vol:.07,slide:600,at:.16}); };
+const sHorn   = () => { tone(98,1.4,{type:"sawtooth",vol:.12,attack:.25}); tone(147,1.4,{type:"sawtooth",vol:.08,attack:.25}); };
+const sBoing  = () => tone(180,.5,{type:"sine",vol:.3,slide:900});
+const sSplash = () => noise(.9,{vol:.25,freq:1800});
+// "What shall we do with the drunken sailor" (canción marinera tradicional, dominio público)
+const SHANTY = [[440,1],[440,.5],[440,.5],[440,1],[440,.5],[440,.5],[440,1],[294,1],[349,1],[440,1],
+                [392,1],[392,.5],[392,.5],[392,1],[392,.5],[392,.5],[392,1],[262,1],[330,1],[392,1],
+                [440,1],[440,.5],[440,.5],[440,1],[440,.5],[440,.5],[440,1],[494,1],[554,1],[587,1],
+                [523,1],[440,1],[392,1],[330,1],[294,2],[294,2]];
+function shanty(notes, beat=.2, vol=.12, music=false){ let t = 0; notes.forEach(([f,d]) => { tone(f, d*beat*.95, {type:"square", vol, at:t, music}); tone(f/2, d*beat*.9, {type:"triangle", vol:vol*.8, at:t, music}); t += d*beat; }); return t; }
+const sJingle = () => shanty(SHANTY.slice(0,10), .13, .1);
+const sOk = () => { sCoins(); tone(990,.15,{at:.05}); };
+const sKo = () => { sSquawk(); tone(196,.35,{type:"triangle",vol:.15,at:.1}); };
+const sWin = () => { sBell(); setTimeout(sJingle, 300); };
+function startMusic(){
+  if (!S.music || !S.sound || musicTimer) return;
+  try { bus().gain.value = 1; } catch(e){}
+  const loop = () => { const dur = shanty(SHANTY, .28, .035, true); noise(1.2,{vol:.05,freq:900,at:dur-1}); musicTimer = setTimeout(loop, dur*1000 + 2500); };
+  loop();
+}
+function stopMusic(){ clearTimeout(musicTimer); musicTimer = null; try { bus().gain.value = 0; } catch(e){} }
+function toggleMusic(){ S.music = !S.music; save(); S.music ? startMusic() : stopMusic(); render(); }
+document.addEventListener("pointerdown", () => { ac(); startMusic(); }, {once:true});
+
+// ==================================================================
+// NAVEGACIÓN
+// ==================================================================
+let screen = "map", familyOpen = false, G = null;
+function go(t){ stopTimer(); G = null; screen = t; render(); window.scrollTo({top:0}); }
+function render(){
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === screen));
+  document.getElementById("tabs").style.display = screen === "game" ? "none" : "";
+  ({map:renderMap, island:renderIsland, exams:renderExams, game:renderGame, end:renderEnd,
+    treasure:renderTreasure, cine:renderCine, family:renderFamily})[screen]();
+}
+function hud(){
+  return `<div class="hud"><div class="title">Gran Line del Saber</div>
+    <span class="chip">💰 ${fmtB(S.berries)}</span><span class="chip">🎬 ${S.tickets.earned - S.tickets.redeemed.length}</span>
+    <button class="chip" style="cursor:pointer" onclick="toggleMusic()" aria-label="Música">${S.music && S.sound ? "🎵" : "🔇"}</button></div>`;
+}
+
+// ---------------- MAPA (dos mares) ----------------
+const SEAS = {
+  school: {title:"🏫 Mar de la Escuela", sub:"Lo que estudias en el cole y los exámenes de tus fichas", isl:[["cat",95,78],["cas",262,160],["exam",115,262]]},
+  bonus:  {title:"💎 Mar del Tesoro",    sub:"Retos extra para ganar MÁS recompensas: ¡berries x2!",    isl:[["mat",262,78],["gen",95,160],["eng",250,262]]},
+};
+function islandSVG(id,x,y){
+  const isExam = id === "exam";
+  const name = isExam ? "Exámenes" : SUBJ[id].short;
+  const emoji = isExam ? "🏰" : SUBJ[id].emoji;
+  const color = isExam ? "#111" : SUBJ[id].color;
+  const st = isExam ? Object.keys(S.exams).length : (S.stars[id]||0);
+  const marks = isExam ? `${st}/${EXAMS.length} hechos` : "★".repeat(st) + "☆".repeat(3-st);
+  return `<g class="isl" onclick="openIsland('${id}')" transform="translate(${x},${y})"><g class="islin">
+    <ellipse rx="60" ry="18" cy="18" fill="#fff" opacity=".25"/>
+    <ellipse rx="54" ry="22" cy="8" fill="#f3d9a0" stroke="#c9a15a" stroke-width="3"/>
+    <path d="M-38 6 Q-32 -26 0 -28 Q32 -26 38 6Z" fill="#3fa34d" stroke="#2a7d3c" stroke-width="3"/>
+    <path d="M22 -18 V-62" stroke="#5d3a17" stroke-width="5"/>
+    <path class="flag" d="M22 -62 l28 9 -28 9z" fill="${color}"/>
+    <text x="-8" y="-4" font-size="28" text-anchor="middle">${emoji}</text>
+    <rect x="-52" y="34" width="104" height="44" rx="10" fill="#fbe9b7" stroke="#8a5a2b" stroke-width="3"/>
+    <text y="56" text-anchor="middle" class="isl-name">${name}</text>
+    <text y="72" text-anchor="middle" font-size="14" font-weight="900" fill="#b8860b">${marks}</text>
+  </g></g>`;
+}
+function seaCard(key){
+  const sea = SEAS[key], here = sea.isl.find(x => x[0] === S.lastIsland);
+  const [a,b,c] = sea.isl;
+  const route = `M${a[1]} ${a[2]} C${(a[1]+b[1])/2} ${a[2]} ${b[1]} ${a[2]+20} ${b[1]} ${b[2]} S${c[1]} ${b[2]+30} ${c[1]} ${c[2]}`;
+  return `<div class="card sea-${key}" style="padding:12px">
+    <h2 style="margin:0;font-size:28px">${sea.title}</h2><p class="hint" style="margin:2px 0 8px">${sea.sub}</p>
+    <div class="map" style="border-radius:16px;overflow:hidden;border:3px solid var(--wood)">
+      <svg viewBox="0 0 360 350">
+        <rect width="360" height="350" fill="${key === "bonus" ? "url(#seaGold)" : "url(#seaGrad)"}"/>
+        <g stroke="#fff" stroke-opacity=".35" stroke-width="3" fill="none"><path d="M20 230 q15 -10 30 0 t30 0"/><path d="M280 200 q15 -10 30 0 t30 0"/><path d="M160 30 q15 -10 30 0 t30 0"/></g>
+        ${key === "bonus" ? `<text x="180" y="225" font-size="30" text-anchor="middle" opacity=".7">✨💎✨</text>` : ""}
+        <path d="${route}" stroke="#fff" stroke-width="5" stroke-dasharray="4 12" stroke-linecap="round" fill="none" opacity=".85"/>
+        ${sea.isl.map(x => islandSVG(...x)).join("")}
+        ${here ? `<g transform="translate(${here[1] + (here[1] < 180 ? 60 : -150)},${here[2] - 50})"><g class="bob"><use href="#ship" width="90" height="75"/></g></g>` : ""}
+      </svg>
+    </div></div>`;
+}
+function renderMap(){
+  const r = rankIdx(S.berries);
+  app.innerHTML = `${hud()}
+    <div class="parrot" style="margin-top:12px"><div class="bird">${icon("parrot",62,62)}</div>
+      <div class="bubble talk">¡Hola, CaptainLukiLufy! Eres <b>${RANKS[r].n}</b>. 🔥 Racha: ${S.streak.days} día${S.streak.days===1?"":"s"}. ¡Toca una isla!</div></div>
+    ${seaCard("school")}
+    ${seaCard("bonus")}`;
+}
+function openIsland(id){
+  if (id === "exam"){ screen = "exams"; render(); return; }
+  S.lastIsland = id; save(); sBell(); screen = "island"; render(); window.scrollTo({top:0});
+}
+
+// ---------------- ISLA ----------------
+function medal(id){
+  const st = S.stars[id]||0, master = st>=3 && (S.wins[id]||0)>=1 && (S.crono[id]||0)>=12;
+  return master ? "👑" : ["⚪","🥉","🥈","🥇"][st];
+}
+function renderIsland(){
+  const id = S.lastIsland, s = SUBJ[id], st = S.stars[id]||0, nw = (S.wrong[id]||[]).length;
+  const stat = S.stats[id] || {ok:0, ko:0};
+  app.innerHTML = `${hud()}
+    <div class="card">
+      <div class="spread"><h2 style="margin:0;font-size:32px">${s.emoji} ${esc(s.name)}</h2><span style="font-size:40px">${medal(id)}</span></div>
+      <p style="margin:6px 0 0"><b>${"⭐".repeat(st)}${"☆".repeat(3-st)}</b> · Mejor contrarreloj: <b>${S.crono[id]||0}</b> · Batallas ganadas: <b>${S.wins[id]||0}</b></p>
+      <p class="hint" style="margin:4px 0 0">Aciertos totales aquí: ${stat.ok} de ${stat.ok+stat.ko}</p>
+      ${s.zone === "bonus" ? `<div class="x2">💎 Mar del Tesoro: berries x2 y batallas con 2 🧩</div>` : `<div class="tag" style="margin-top:8px">🏫 Repaso del cole</div>`}
+      <button class="btn block" onclick="startGame('aventura')">🗺️ Aventura <small>10 preguntas · consigue hasta 3 ⭐</small></button>
+      <button class="btn block gold" onclick="startGame('crono')">⏱️ Contrarreloj de goma <small>¿Cuántas aciertas en 60 segundos?</small></button>
+      <button class="btn block blue" onclick="startGame('batalla')">⚔️ Batalla contra ${esc(s.boss)} <small>Cada acierto es un puñetazo · tienes 3 🍖 de vida</small></button>
+      <button class="btn block green" ${nw?"":"disabled"} onclick="startGame('repaso')">🩹 Repaso de errores (${nw}) <small>Chopper te ayuda a curar tus fallos</small></button>
+      <button class="btn ghost" style="margin-top:16px" onclick="go('map')">◀ Volver al mapa</button>
+    </div>
+    <div class="card"><b>Premios de esta isla</b>
+      <p class="hint" style="margin:6px 0 0">🥉🥈🥇 medalla según las estrellas · 👑 Maestro: 3⭐ + ganar una batalla + 12 en contrarreloj.<br>
+      🧩 Ganas una pieza de mapa con 3⭐, con cada batalla ganada o con 12+ en contrarreloj. ${PIECES_PER_TICKET} piezas = 🎬 vale por un capítulo.</p>
+    </div>`;
+}
+
+// ---------------- EXÁMENES ----------------
+function examData(e){ try { return JSON.parse(localStorage.getItem(e.key)); } catch(x){ return null; } }
+function renderExams(){
+  checkExams();
+  const rows = EXAMS.map(e => {
+    const d = examData(e), done = d && d.finished;
+    const nota = done && d.total ? (d.score/d.total*10).toFixed(1).replace(".",",") : null;
+    const n = d ? d.answers.filter(x => x != null).length : 0;
+    const status = done ? `✅ Terminado${nota ? " · Nota " + nota : ""}` : n ? `⏳ A medias (${n} respuestas)` : "🆕 Sin empezar";
+    return `<div class="card" style="margin-top:12px">
+      <div class="spread"><div><h3 style="margin:0;font-size:26px">${esc(e.name)}</h3><span class="hint">${esc(e.sub)}</span></div>${icon("chest",56,46)}</div>
+      <p style="margin:8px 0;font-weight:800">${status}</p>
+      <a class="btn" href="${e.file}">${done ? "Ver / repetir" : n ? "Continuar" : "Empezar"} ⚓</a></div>`;
+  }).join("");
+  app.innerHTML = `${hud()}
+    <div class="card center"><h2 style="margin:0;font-size:34px">🏰 Isla de los Exámenes</h2>
+      <p style="margin:6px 0 0">Exámenes de verdad, sacados de tus fichas del cole.<br><b>Nota 7 o más = 🎬 vale por un capítulo</b> y muchos berries.</p></div>
+    ${rows}
+    <button class="btn ghost" style="margin-top:16px" onclick="go('map')">◀ Volver al mapa</button>`;
+}
+function checkExams(){
+  const unlocked = [];
+  EXAMS.forEach(e => {
+    const d = examData(e);
+    if (!d || !d.finished) return;
+    const tag = String(d.at||0);
+    if (S.exams[e.key] && S.exams[e.key].at === tag) return;
+    const nota = d.total ? d.score/d.total*10 : null;
+    S.exams[e.key] = {at:tag, nota};
+    S.berries += d.total ? d.score * 20e6 : 100e6;
+    if (nota != null && nota >= 7){ S.tickets.earned++; unlocked.push(`🎬 ¡Vale por un capítulo por tu ${esc(e.name)} (nota ${nota.toFixed(1).replace(".",",")})!`); }
+  });
+  if (unlocked.length){ save(); afterRewards(unlocked); }
+  else save();
+}
+
+// ---------------- JUEGO ----------------
+let timer = null;
+function stopTimer(){ if (timer){ clearInterval(timer); timer = null; } }
+function drawQ(id, excludeVideo){
+  if (id === "mat") return genMat();
+  const pool = BANK[id].filter(q => !(excludeVideo && (q.v || (G && G.mode === "crono" && q.t === "order"))));
+  const recent = G ? G.seen : [];
+  const fresh = pool.filter(q => !recent.includes(q));
+  const from = fresh.length ? fresh : pool;
+  return from[Math.floor(Math.random()*from.length)];
+}
+function startGame(mode){
+  const id = S.lastIsland;
+  G = {id, mode, i:0, ok:0, ko:0, combo:0, seen:[], list:null, built:[], lives:3, boss:8, bossMax:8, locked:false, newUnlocks:[]};
+  if (mode === "aventura"){
+    if (id === "mat") G.list = Array.from({length:10}, genMat);
+    else {
+      const vids = shuffle(BANK[id].filter(q => q.v)).slice(0,1);
+      G.list = shuffle(shuffle(BANK[id].filter(q => !q.v)).slice(0, 10 - vids.length).concat(vids));
+    }
+  }
+  if (mode === "repaso") G.list = shuffle(S.wrong[id] || []).slice(0, 10);
+  if (mode === "crono"){ G.end = Date.now() + 60000;
+    timer = setInterval(() => { const left = Math.max(0, G.end - Date.now());
+      const bar = document.getElementById("tbar"); if (bar) bar.style.width = (left/600)+"%";
+      const tl = document.getElementById("tleft"); if (tl) tl.textContent = Math.ceil(left/1000)+" s";
+      if (!left){ stopTimer(); finish(); } }, 100);
+  }
+  nextQ(); screen = "game"; render(); window.scrollTo({top:0});
+  mode === "batalla" ? sHorn() : sBell();
+}
+function nextQ(){
+  const q = G.list ? G.list[G.i] : drawQ(G.id, true);
+  G.q = q; G.built = [];
+  if (q.t === "order"){ let w; do { w = shuffle(q.w); } while (w.join() === q.w.join()); G.opts = w; }
+  else G.opts = (G.id === "mat" || q.o.length > 4) ? shuffle(q.o) : q.o.slice();
+  G.seen.push(q); if (G.seen.length > 12) G.seen.shift();
+  G.locked = false;
+}
+function renderGame(){
+  const s = SUBJ[G.id], q = G.q;
+  let top = "";
+  if (G.mode === "crono") top = `<div class="bar time"><i id="tbar" style="width:100%"></i></div><span class="chip" id="tleft">60 s</span><span class="chip">✅ ${G.ok}</span>`;
+  else if (G.mode === "batalla") top = `<span class="chip">✅ ${G.ok}</span>`;
+  else top = `<div class="bar"><i style="width:${G.i/G.list.length*100}%"></i></div><span class="chip">${G.i+1}/${G.list.length}</span>`;
+  const arena = G.mode !== "batalla" ? "" : `
+    <div class="arena">
+      <div class="me" id="me">${icon("hat",80,44)}<div class="meat">${"🍖".repeat(G.lives)}${"🦴".repeat(3-G.lives)}</div><b style="font-size:10px">CaptainLukiLufy</b></div>
+      <div class="arm" id="arm"></div><div class="bang" id="bang">¡POW!</div>
+      <div class="boss" id="boss"><svg width="96" height="96" style="color:${s.bossColor}"><use href="#monster"/></svg>
+        <div class="hp"><i style="width:${G.boss/G.bossMax*100}%"></i></div><b style="font-size:11px">${esc(s.boss)}</b></div>
+    </div>`;
+  const vid = q.v ? `<a class="video" href="${q.v.url}" target="_blank" rel="noopener">▶ Ver «${esc(q.v.t)}» (en inglés, ~2 min)</a>` : "";
+  const long = G.opts.some(o => o.length > 16);
+  const body = q.t === "order"
+    ? `<div class="chips">${G.opts.map((w,k) => `<button class="wchip ${G.built.includes(k)?"used":""}" onclick="tapWord(${k})">${esc(w)}</button>`).join("")}</div>
+       <div class="slots" id="slots">${G.built.length ? G.built.map((k,n) => `<span class="slot" onclick="untap(${n})">${esc(G.opts[k])}</span>`).join("") : `<span class="hint">Toca las palabras en orden…</span>`}</div>`
+    : `<div class="opts ${long?"one":""}">${G.opts.map((o,k) => `<button class="opt" onclick="answer(${k})">${esc(o)}</button>`).join("")}</div>`;
+  app.innerHTML = `
+    <div class="hud" style="margin-top:4px"><button class="btn ghost" style="padding:6px 12px;font-size:15px" onclick="quitGame()">✕</button>${top}</div>
+    ${SUBJ[G.id].zone === "bonus" ? `<div class="x2">💎 Mar del Tesoro: ¡berries x2!</div>` : ""}
+    ${arena}
+    <div class="card">
+      <span class="tag">${s.emoji} ${esc(s.short)} · ${({aventura:"Aventura",crono:"Contrarreloj",batalla:"Batalla",repaso:"Repaso"})[G.mode]}</span>
+      <div class="q-title">${esc(q.q)}</div>
+      ${q.s ? `<div class="q-sentence">${esc(q.s)}</div>` : ""}
+      ${vid}
+      ${body}
+      <div class="feedback" id="fb"></div>
+    </div>
+    <div class="parrot"><div class="bird">${icon("parrot",62,62)}</div><div class="bubble" id="say">${esc(G.say || sayStart())}</div>${G.combo>=2?`<div class="combo">🔥 x${G.combo}</div>`:""}</div>`;
+}
+function quitGame(){ if (G && (G.ok + G.ko) > 0 && !confirm("¿Salir de la partida? No contará.")) return; stopTimer(); G = null; screen = "island"; render(); }
+
+function wrongKey(q){ return q.q + "|" + (q.s||"") + "|" + q.a; }
+function tapWord(k){
+  if (!G || G.locked || G.built.includes(k)) return;
+  G.built.push(k); tone(330 + G.built.length*70, .09, {type:"sine", vol:.15}); renderGame();
+  if (G.built.length === G.opts.length) answer(-1);
+}
+function untap(n){ if (!G || G.locked) return; G.built.splice(n,1); renderGame(); }
+const SAY_OK = ["¡Croac! ¡Eso es!","¡Qué crack, CaptainLukiLufy!","¡Toma ya! 💥","¡Berries para el capitán!","¡Ni Zoro se pierde tan poco!","¡Eres un genio pirata!"];
+const SAY_KO = ["¡Ups! Mira la buena 👀","¡No pasa nada, otra!","Hasta Luffy se equivoca 😅","¡Ánimo, capitán!"];
+function sayStart(){ return ["¡Vamos, CaptainLukiLufy! ¡Tú puedes!","¡Leva anclas! ⚓","Lee con calma, pirata 🦜"][G.i % 3]; }
+function answer(k){
+  if (!G || G.locked) return; G.locked = true;
+  const q = G.q, isOrder = q.t === "order";
+  const pick = isOrder ? G.built.map(j => G.opts[j]).join(" ") : G.opts[k];
+  if (isOrder) q.a = q.w.join(" ");
+  const ok = pick === q.a;
+  if (isOrder){ const sl = document.getElementById("slots"); sl.classList.add(ok ? "good" : "bad");
+    if (!ok) sl.insertAdjacentHTML("afterend", `<div class="q-sentence" style="font-size:18px">✔ ${esc(q.a)}</div>`); }
+  else { const btns = app.querySelectorAll(".opt");
+    btns[k].classList.add(ok ? "ok" : "ko");
+    if (!ok) btns[G.opts.indexOf(q.a)].classList.add("ok"); }
+  G.combo = ok ? G.combo + 1 : 0;
+  G.say = ok ? (G.combo >= 3 ? `¡COMBO x${G.combo}! 🔥 +5 M extra` : SAY_OK[Math.floor(Math.random()*SAY_OK.length)]) : SAY_KO[Math.floor(Math.random()*SAY_KO.length)];
+  const say = document.getElementById("say"); if (say){ say.textContent = G.say; say.classList.remove("talk"); void say.offsetWidth; say.classList.add("talk"); }
+  const fb = document.getElementById("fb");
+  const st = S.stats[G.id] = S.stats[G.id] || {ok:0, ko:0, miss:{}};
+  const wl = S.wrong[G.id] = S.wrong[G.id] || [];
+  const key = wrongKey(q);
+  if (ok){
+    const mult = SUBJ[G.id].zone === "bonus" ? 2 : 1;
+    G.ok++; st.ok++; S.totalOk++; S.berries += 10e6 * mult + (G.combo >= 3 ? 5e6 : 0); sOk();
+    fb.className = "feedback ok"; fb.textContent = ["¡Correcto! 🎉","¡Genial! ⭐","¡Así se hace, pirata! 🏴‍☠️","¡Bingo! 💰"][G.ok % 4];
+    if (G.mode === "repaso"){ const j = wl.findIndex(x => wrongKey(x) === key); if (j >= 0){ wl.splice(j,1); S.fixed++; } }
+  } else {
+    G.ko++; st.ko++; sKo();
+    st.miss = st.miss || {}; st.miss[key] = (st.miss[key]||0) + 1;
+    if (G.id !== "mat" || wl.length < 30){ if (!wl.some(x => wrongKey(x) === key)) wl.push(q.t === "order" ? {t:"order", q:q.q, w:q.w} : {q:q.q, s:q.s, o:q.o, a:q.a, v:q.v}); }
+    fb.className = "feedback ko"; fb.textContent = "¡Casi! La buena era: " + q.a;
+    app.querySelector(".card").classList.add("shake");
+  }
+  save();
+  let wait = ok ? 900 : (isOrder ? 2600 : 1900);
+  if (G.mode === "crono") wait = ok ? 350 : 1100;
+  if (G.mode === "batalla"){
+    const arm = document.getElementById("arm"), boss = document.getElementById("boss"), me = document.getElementById("me");
+    if (ok){ G.boss--; arm.classList.add("go"); sBoing(); setTimeout(()=>{ sCannon(); boss.classList.add("hit"); document.getElementById("bang").classList.add("go"); }, 260); }
+    else { G.lives--; me.classList.add("hurt"); setTimeout(sSplash, 150); }
+    wait = ok ? 1100 : 1900;
+  }
+  setTimeout(() => {
+    if (!G) return;
+    if (G.mode === "crono" && Date.now() >= G.end) return;
+    if (G.mode === "batalla" && (G.boss <= 0 || G.lives <= 0)) return finish();
+    G.i++;
+    if (G.list && G.i >= G.list.length) return finish();
+    G.say = null; nextQ(); renderGame();
+  }, wait);
+}
+
+function finish(){
+  stopTimer();
+  const id = G.id, msgs = [];
+  let good = false, piece = 0;
+  if (G.mode === "aventura"){
+    const n = G.list.length, stars = G.ok >= n-1 ? 3 : G.ok >= n*.7 ? 2 : G.ok >= n/2 ? 1 : 0;
+    G.stars = stars; good = stars >= 2;
+    if (stars > (S.stars[id]||0)){ S.stars[id] = stars; msgs.push(`¡Nuevo récord en ${SUBJ[id].short}: ${"⭐".repeat(stars)}!`); }
+    if (stars === 3) piece++;
+  }
+  if (G.mode === "crono"){
+    good = G.ok >= 8;
+    if (G.ok > (S.crono[id]||0)){ S.crono[id] = G.ok; msgs.push(`¡Nuevo récord de contrarreloj: ${G.ok}!`); }
+    if (G.ok >= 12) piece++;
+  }
+  if (G.mode === "batalla"){
+    G.won = G.boss <= 0; good = G.won;
+    if (G.won){ S.wins[id] = (S.wins[id]||0) + 1; piece += SUBJ[id].zone === "bonus" ? 2 : 1; S.berries += 50e6; msgs.push(`¡Has derrotado a ${SUBJ[id].boss}! +50 M de berries`); }
+  }
+  if (G.mode === "repaso"){ good = G.ok >= G.ko; if (!(S.wrong[id]||[]).length) msgs.push("¡Chopper ha curado todos tus errores de esta isla! 🩺"); }
+  if (piece){ S.pieces += piece; msgs.push("🧩 ¡Has ganado una pieza de mapa!"); }
+  while (S.pieces >= PIECES_PER_TICKET){ S.pieces -= PIECES_PER_TICKET; S.tickets.earned++; msgs.push("🎬 ¡Mapa completo! ¡VALE POR UN CAPÍTULO DE ONE PIECE!"); }
+  S.games++;
+  const t = today(), y = new Date(Date.now()-864e5).toLocaleDateString("sv");
+  if (S.streak.last !== t){ S.streak.days = S.streak.last === y ? S.streak.days + 1 : 1; S.streak.last = t; }
+  G.msgs = msgs; G.good = good;
+  save();
+  screen = "end"; render(); window.scrollTo({top:0});
+  if (good) sWin(); else sHorn();
+  afterRewards([], good);
+}
+
+function renderEnd(){
+  const s = SUBJ[G.id];
+  let big = "", title = "";
+  if (G.mode === "aventura"){ title = ["¡Sigue entrenando!","¡Bien hecho!","¡Muy bien!","¡PERFECTO!"][G.stars]; big = `<div style="font-size:54px">${"⭐".repeat(G.stars)}${"☆".repeat(3-G.stars)}</div><b>${G.ok} de ${G.list.length} correctas</b>`; }
+  if (G.mode === "crono"){ title = G.ok >= 12 ? "¡Velocidad de goma!" : "¡Tiempo!"; big = `<div style="font-size:60px;font-weight:900">${G.ok}</div><b>aciertos en 60 segundos</b>`; }
+  if (G.mode === "batalla"){ title = G.won ? "¡VICTORIA!" : "¡Retirada!"; big = G.won ? `<div class="spin-in">${icon("jolly",120,120)}</div>` : `<div><svg width="110" height="110" style="color:${s.bossColor}"><use href="#monster"/></svg></div><b>${esc(s.boss)} ha ganado esta vez. ¡Revancha!</b>`; }
+  if (G.mode === "repaso"){ title = "¡Repaso hecho!"; big = `<b>${G.ok} curadas · ${G.ko} por repasar</b>`; }
+  app.innerHTML = `
+    <div class="card center pop">
+      <h1 style="font-size:42px;margin:4px 0;color:var(--red)">${title}</h1>
+      ${big}
+      <p style="font-weight:900;margin:12px 0 0">💰 Berries totales: ${fmtB(S.berries)}</p>
+      ${G.msgs.map(m => `<p style="font-weight:800;margin:6px 0">${m}</p>`).join("")}
+      <p class="pieces">${"🧩".repeat(S.pieces)}${"▫️".repeat(PIECES_PER_TICKET - S.pieces)}</p>
+      <div class="row" style="justify-content:center">
+        <button class="btn" onclick="startGame('${G.mode === "repaso" && !(S.wrong[G.id]||[]).length ? "aventura" : G.mode}')">Otra vez 🔁</button>
+        <button class="btn ghost" onclick="screen='island';render()">A la isla</button>
+      </div>
+    </div>`;
+}
+
+// ---------------- RECOMPENSAS: cromos, rangos, animaciones ----------------
+function afterRewards(extra, celebrate){
+  const queue = [];
+  extra.forEach(m => queue.push({title:"¡Premio!", html:`<p style="font-size:20px;font-weight:900">${m}</p>${icon("chest",120,98,"spin-in")}`}));
+  CREW.forEach(c => {
+    if (!S.stickers.includes(c.id) && c.ok(S)){
+      S.stickers.push(c.id);
+      queue.push({title:"¡Nuevo miembro de la tripulación!", html:`<div class="spin-in">${icon(c.sym,130,130)}</div><h2 style="font-size:40px;margin:6px 0">${esc(c.name)}</h2><p class="hint">${esc(c.cond)} ✔</p>`});
+    }
+  });
+  const r = rankIdx(S.berries);
+  if (r > S.rank){
+    S.rank = r;
+    const an = ANIMS.find(a => a.rank === r);
+    queue.push({title:"¡Tu recompensa sube!", html:`<div class="poster pop" style="width:170px"><div class="wanted" style="font-size:34px">WANTED</div>${icon("jolly",120,120)}<div class="name" style="font-size:24px">CaptainLukiLufy</div><div class="berries">฿ ${fmtB(S.berries)}</div></div>
+      <h2 style="font-size:30px;margin:12px 0 0">Nuevo rango: ${RANKS[r].n}</h2>${an ? `<p><b>🎬 Animación desbloqueada: ${an.name}</b></p>` : ""}`, anim: an && an.id});
+  }
+  save();
+  const next = () => {
+    const m = queue.shift();
+    if (!m){ if (celebrate) playAnim(randomAnim()); return; }
+    sCoins(); setTimeout(sJingle, 250); confetti();
+    showModal(`<h2 style="margin:0 0 8px;font-size:30px">${m.title}</h2>${m.html}`, () => m.anim ? playAnim(m.anim, next) : next());
+  };
+  next();
+}
+function unlockedAnims(){ return ANIMS.filter(a => a.rank <= rankIdx(S.berries)); }
+function randomAnim(){ const u = unlockedAnims(); return u[Math.floor(Math.random()*u.length)].id; }
+
+function showModal(html, onClose, btn="¡Genial!"){
+  const root = document.getElementById("modalRoot");
+  root.innerHTML = `<div class="modal"><div class="card center pop">${html}<div style="margin-top:14px"><button class="btn gold" id="mOk">${btn}</button></div></div></div>`;
+  document.getElementById("mOk").onclick = () => { root.innerHTML = ""; onClose && onClose(); };
+}
+function askPin(onOk){
+  const root = document.getElementById("modalRoot");
+  root.innerHTML = `<div class="modal"><div class="card center pop"><h2 style="margin:0;font-size:30px">🔒 Solo para la familia</h2>
+    <input id="pin" type="password" inputmode="numeric" autocomplete="off" placeholder="Código"
+      style="font:inherit;font-size:22px;font-weight:900;padding:10px;border-radius:12px;border:3px solid #d9c18a;width:160px;text-align:center;margin:14px 0 4px">
+    <div id="pinErr" style="color:var(--red);font-weight:900;min-height:24px"></div>
+    <div class="row" style="justify-content:center"><button class="btn ghost" id="pinNo">Cancelar</button><button class="btn" id="pinOk">Entrar</button></div></div></div>`;
+  const inp = document.getElementById("pin"); inp.focus();
+  const tryIt = () => { if (inp.value.trim() === FAMILY_PIN){ root.innerHTML = ""; onOk(); } else document.getElementById("pinErr").textContent = "Código incorrecto 🏴‍☠️"; };
+  document.getElementById("pinOk").onclick = tryIt;
+  inp.onkeydown = e => { if (e.key === "Enter") tryIt(); };
+  document.getElementById("pinNo").onclick = () => root.innerHTML = "";
+}
+function confetti(){
+  const e = ["🏴‍☠️","💰","⭐","👒","🍖","⚓"];
+  for (let k=0;k<30;k++){
+    const d = document.createElement("div"); d.className = "confetti";
+    d.textContent = e[k % e.length]; d.style.left = Math.random()*100+"vw";
+    d.style.animationDelay = Math.random()*1+"s"; document.body.appendChild(d);
+    setTimeout(()=>d.remove(), 4000);
+  }
+}
+
+// ---------------- ANIMACIONES ("Cine del barco") ----------------
+let fxDone = null, fxTimer = null, fxRAF = null;
+const WAVES = `<svg class="fx-waves" viewBox="0 0 1200 200" preserveAspectRatio="none"><path d="M0 40 Q75 0 150 40 T300 40 T450 40 T600 40 T750 40 T900 40 T1050 40 T1200 40 V200 H0Z" fill="#0b4f8a" opacity=".9"/></svg>`;
+function playAnim(id, done){
+  const fx = document.getElementById("fx");
+  fxDone = done || null; fx.className = "on";
+  let html = "", dur = 5200;
+  if (id === "sail") html = `${WAVES}<div class="fx-ship">${icon("ship",240,200)}</div><div class="cap">¡Zarpamos!</div>`;
+  if (id === "gomu") html = `${WAVES}<div class="fx-fist"></div><div class="fx-target">${icon("marine",100,100)}</div><div class="cap">¡GOMU GOMU NO…<br>PISTOL!</div>`, dur = 4200;
+  if (id === "coins"){ html = `${WAVES}<div class="fx-chest">${icon("chest",180,146)}</div><div class="cap">¡Lluvia de berries!</div>`; setTimeout(() => rain(["💰","🪙","💎","👑"], 50), 300); }
+  if (id === "hat") html = `${WAVES}<div class="fx-hat">${icon("hat",130,72)}</div><div class="cap">¡Mi tesoro: el sombrero de paja!</div>`;
+  if (id === "fire"){ html = `${WAVES}<canvas id="fxCanvas"></canvas><div class="cap">¡Fiesta en el barco!</div>`; dur = 6000; }
+  if (id === "king"){ html = `${WAVES}<div class="fx-flag">${icon("jolly",220,220)}</div><div class="cap">¡SERÉ EL REY<br>DE LOS PIRATAS!</div>`; setTimeout(() => rain(["⭐","👑","🏴‍☠️"], 40), 900); dur = 6000; }
+  fx.innerHTML = html + `<div class="tapclose">Toca para cerrar</div>`;
+  if (id === "fire") fireworks();
+  if (id === "gomu"){ setTimeout(sBoing, 400); setTimeout(sCannon, 1500); }
+  if (id === "sail"){ sBell(); setTimeout(sHorn, 600); setTimeout(sSplash, 1500); }
+  if (id === "coins"){ for (let k=0;k<8;k++) setTimeout(sCoins, 300 + k*280); }
+  if (id === "hat") { sSplash(); setTimeout(() => tone(400,1.5,{type:"sine",vol:.12,slide:900}), 200); }
+  if (id === "fire"){ for (let k=0;k<9;k++) setTimeout(() => { tone(600,.4,{type:"sine",vol:.08,slide:1400}); setTimeout(() => noise(.5,{vol:.35,freq:2500}), 380); }, k*620); }
+  if (id === "king"){ sHorn(); setTimeout(() => shanty(SHANTY, .18, .1), 900); }
+  clearTimeout(fxTimer); fxTimer = setTimeout(closeFx, dur);
+}
+function closeFx(){
+  const fx = document.getElementById("fx"); if (!fx.classList.contains("on")) return;
+  clearTimeout(fxTimer); cancelAnimationFrame(fxRAF); fx.className = ""; fx.innerHTML = "";
+  document.querySelectorAll(".confetti").forEach(d => d.remove());
+  const d = fxDone; fxDone = null; d && d();
+}
+function rain(set, n){
+  for (let k=0;k<n;k++){ const d = document.createElement("div"); d.className = "confetti"; d.style.zIndex = 80;
+    d.textContent = set[k % set.length]; d.style.left = Math.random()*100+"vw"; d.style.animationDelay = Math.random()*2+"s";
+    document.body.appendChild(d); setTimeout(()=>d.remove(), 5000); }
+}
+function fireworks(){
+  const c = document.getElementById("fxCanvas"), ctx = c.getContext("2d");
+  const W = c.width = innerWidth, H = c.height = innerHeight, parts = [];
+  const cols = ["#f5b700","#d7263d","#fff","#3fbf5f","#8e44ad","#4fb3e8"];
+  let f = 0;
+  (function tick(){
+    if (f % 28 === 0){ const x = W*(.2+.6*Math.random()), y = H*(.15+.3*Math.random()), col = cols[f%cols.length];
+      for (let k=0;k<50;k++){ const a = Math.random()*6.28, v = 1+Math.random()*4; parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:60,col}); } }
+    ctx.clearRect(0,0,W,H);
+    for (let k=parts.length-1;k>=0;k--){ const p = parts[k]; p.x+=p.vx; p.y+=p.vy; p.vy+=.05; p.l--;
+      ctx.globalAlpha = Math.max(0,p.l/60); ctx.fillStyle = p.col; ctx.fillRect(p.x,p.y,3,3); if (p.l<=0) parts.splice(k,1); }
+    f++; fxRAF = requestAnimationFrame(tick);
+  })();
+}
+
+// ---------------- TESOROS ----------------
+function renderTreasure(){
+  const r = rankIdx(S.berries), nx = RANKS[r+1];
+  const avail = S.tickets.earned - S.tickets.redeemed.length;
+  const tickets = Array.from({length:avail}, (_,k) => `<div class="ticket"><div class="spread"><span>🎬 VALE POR 1 CAPÍTULO<br>DE ONE PIECE</span><button class="btn" style="font-size:15px;padding:8px 12px" onclick="redeem()">Canjear</button></div></div>`).join("")
+    + S.tickets.redeemed.slice(-3).reverse().map(d => `<div class="ticket used">🎬 Vale canjeado el ${esc(d)}</div>`).join("");
+  const album = CREW.map(c => { const on = S.stickers.includes(c.id);
+    return `<div class="sticker ${on?"":"off"}">${icon(c.sym,64,64)}<div>${on?esc(c.name):"???"}</div>${on?"":`<div class="cond">${esc(c.cond)}</div>`}</div>`; }).join("");
+  const medals = Object.keys(SUBJ).map(id => `<div><span>${medal(id)}</span>${SUBJ[id].short}</div>`).join("");
+  app.innerHTML = `${hud()}
+    <div class="card center">
+      <div class="poster"><div class="wanted">WANTED</div>
+        <div style="background:#fff7e0;border:3px solid #b8864b;margin:6px 0;padding:6px">${icon("jolly",130,130)}</div>
+        <div class="name">CaptainLukiLufy</div><div class="berries">฿ ${fmtB(S.berries)}</div></div>
+      <h2 style="font-size:30px;margin:16px 0 4px">${RANKS[r].n}</h2>
+      ${nx ? `<div class="bar" style="height:14px;margin:6px 20px"><i style="width:${Math.min(100,(S.berries-RANKS[r].b)/(nx.b-RANKS[r].b)*100)}%"></i></div><p class="hint" style="margin:4px 0 0">Siguiente rango: ${nx.n} (${fmtB(nx.b)})</p>` : `<p>¡Has llegado a lo más alto! 👑</p>`}
+    </div>
+    <div class="card"><h2 style="margin:0;font-size:28px">🎬 Vales de capítulo</h2>
+      <p class="hint" style="margin:4px 0">Completa mapas 🧩 (${S.pieces}/${PIECES_PER_TICKET}) o saca 7+ en un examen. Papá o mamá los canjean con el código.</p>
+      <p class="pieces" style="margin:4px 0">${"🧩".repeat(S.pieces)}${"▫️".repeat(PIECES_PER_TICKET - S.pieces)}</p>
+      ${tickets || `<p class="hint">Todavía no tienes vales. ¡A navegar!</p>`}
+    </div>
+    <div class="card"><h2 style="margin:0 0 8px;font-size:28px">🏅 Medallas por materia</h2><div class="medals">${medals}</div></div>
+    <div class="card"><h2 style="margin:0 0 8px;font-size:28px">🏴‍☠️ Mi tripulación (${S.stickers.length}/${CREW.length})</h2><div class="album">${album}</div></div>`;
+}
+function redeem(){
+  askPin(() => { S.tickets.redeemed.push(new Date().toLocaleDateString("es-ES")); save(); render();
+    showModal(`<h2 style="font-size:34px;margin:0">¡A ver un capítulo! 🍿</h2>${icon("ship",160,134,"bob")}`, () => playAnim("sail"), "¡Vamos!"); });
+}
+
+// ---------------- CINE ----------------
+function renderCine(){
+  const r = rankIdx(S.berries);
+  app.innerHTML = `${hud()}
+    <div class="card"><h2 style="margin:0;font-size:32px">🎬 Cine del barco</h2>
+      <p class="hint" style="margin:4px 0 0">Animaciones que se desbloquean al subir de rango.</p>
+      ${ANIMS.map(a => { const on = a.rank <= r;
+        return `<button class="btn block ${on?"blue":"ghost"}" ${on?"":"disabled"} onclick="playAnim('${a.id}')">${on?"▶":"🔒"} ${esc(a.name)}<small>${on?"¡Toca para verla!":"Rango necesario: "+RANKS[a.rank].n}</small></button>`; }).join("")}
+    </div>`;
+}
+
+// ---------------- FAMILIA ----------------
+function renderFamily(){
+  if (!familyOpen){
+    app.innerHTML = `${hud()}<div class="card center"><h2 style="margin:0;font-size:30px">🔒 Zona de la familia</h2>
+      <p>Estadísticas, errores frecuentes y vales.</p><button class="btn" onclick="askPin(()=>{familyOpen=true;render()})">Entrar con código</button></div>`;
+    return;
+  }
+  const subj = Object.keys(SUBJ).map(id => {
+    const st = S.stats[id] || {ok:0, ko:0, miss:{}}, tot = st.ok + st.ko;
+    const top = Object.entries(st.miss||{}).sort((a,b)=>b[1]-a[1]).slice(0,5)
+      .map(([k,n]) => { const [q,s,a] = k.split("|"); return `<li>${esc(s||q)} → <b>${esc(a)}</b> <span class="hint">(${n}×)</span></li>`; }).join("");
+    return `<div class="card" style="margin-top:10px"><div class="spread"><b style="font-size:19px">${SUBJ[id].emoji} ${SUBJ[id].short}</b><span>${medal(id)} ${"⭐".repeat(S.stars[id]||0)}</span></div>
+      <p style="margin:6px 0">Preguntas: <b>${tot}</b> · Acierto: <b>${tot?Math.round(st.ok/tot*100):0}%</b> · Errores pendientes: <b>${(S.wrong[id]||[]).length}</b></p>
+      ${top ? `<div class="hint">Lo que más falla:</div><ul style="margin:4px 0 0;padding-left:20px">${top}</ul>` : ""}</div>`;
+  }).join("");
+  const exams = EXAMS.map(e => { const x = S.exams[e.key]; return `<li>${esc(e.name)}: ${x ? (x.nota != null ? "nota " + x.nota.toFixed(1).replace(".",",") : "terminado") : "sin hacer"}</li>`; }).join("");
+  app.innerHTML = `${hud()}
+    <div class="card"><h2 style="margin:0;font-size:30px">👪 Familia</h2>
+      <p style="margin:6px 0">Partidas: <b>${S.games}</b> · Aciertos totales: <b>${S.totalOk}</b> · Racha: <b>${S.streak.days} días</b></p>
+      <p style="margin:6px 0">Vales: <b>${S.tickets.earned}</b> ganados, <b>${S.tickets.redeemed.length}</b> canjeados</p>
+      <ul style="margin:6px 0;padding-left:20px">${exams}</ul>
+      <p class="hint">Las respuestas de cada examen están al final del examen, con el mismo código.</p>
+      <div class="row">
+        <button class="btn ghost" onclick="S.tickets.earned++;save();render()">🎁 Regalar un vale</button>
+        <button class="btn ghost" onclick="S.sound=!S.sound;if(!S.sound)stopMusic();save();render()">${S.sound?"🔊 Sonido sí":"🔇 Sonido no"}</button>
+        <button class="btn ghost" onclick="if(confirm('¿Borrar TODO el progreso de la app? (los exámenes no se borran)')){S=blank();save();familyOpen=false;go('map')}">🗑️ Reiniciar</button>
+      </div>
+    </div>${subj}`;
+}
+
+// ---------------- ARRANQUE ----------------
+window.addEventListener("pageshow", () => { checkExams(); if (screen === "exams" || screen === "map") render(); });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) checkExams(); });
+render();
+if ("serviceWorker" in navigator && location.protocol !== "file:") navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
