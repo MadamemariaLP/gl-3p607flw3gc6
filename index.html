@@ -626,11 +626,12 @@ const PIECES_PER_TICKET = 4;
 // ==================================================================
 // Jugadores: cada uno con su propio progreso. p1 = el jugador original (conserva sus datos)
 const PROF_KEY = "glds-profiles";
-const AVATARS = ["👒","⚔️","🍊","🎯","🍖","🦌","📚","⭐","💀","🐟","🦜","🔥"];
+const AVATARS = ["🏴‍☠️","☠️","⚔️","🍊","🎯","🍖","🦌","📚","⭐","🐟","🦜","🔥"];
 let P = loadProfiles();
 function loadProfiles(){
-  try { const p = JSON.parse(localStorage.getItem(PROF_KEY)); if (p && p.list && p.list.length) return p; } catch(e){}
-  return {list:[{id:"p1", name:"CaptainLukiLufy", av:"👒"}], current:"p1"};
+  try { const p = JSON.parse(localStorage.getItem(PROF_KEY));
+    if (p && p.list && p.list.length){ p.list.forEach(x => { if (x.av === "👒") x.av = "🏴‍☠️"; }); return p; } } catch(e){}
+  return {list:[{id:"p1", name:"CaptainLukiLufy", av:"🏴‍☠️"}], current:"p1"};
 }
 function saveProfiles(){ try { localStorage.setItem(PROF_KEY, JSON.stringify(P)); } catch(e){} }
 const me = () => P.list.find(x => x.id === P.current) || P.list[0];
@@ -1324,7 +1325,8 @@ function renderFamily(){
     <div class="card"><h2 style="margin:0;font-size:26px">🏴‍☠️ Jugadores</h2>
       <p class="hint" style="margin:4px 0 8px">Ahora mismo estás viendo los datos de <b>${esc(me().name)}</b>. Los premios y estadísticas de abajo son suyos.</p>
       ${P.list.map((p,k) => `<div class="spread" style="padding:6px 0;border-bottom:1px solid #e6d19b;font-weight:800"><span>${p.av} ${esc(p.name)}${p.id===P.current?" (jugando)":""}</span>
-        <span><button class="btn ghost" style="font-size:13px;padding:4px 10px" onclick="renamePlayer(${k})">✏️</button>
+        <span><button class="btn ghost" style="font-size:13px;padding:4px 10px" onclick="changeAvatar(${k})">🎭</button>
+        <button class="btn ghost" style="font-size:13px;padding:4px 10px" onclick="renamePlayer(${k})">✏️</button>
         ${p.id === "p1" || p.id === P.current ? "" : `<button class="btn ghost" style="font-size:13px;padding:4px 10px" onclick="deletePlayer(${k})">🗑️</button>`}</span></div>`).join("")}
       <button class="btn ghost" style="margin-top:10px" onclick="go('who')">🔄 Cambiar de jugador</button>
     </div>
@@ -1391,6 +1393,13 @@ function deletePlayer(k){
   try { localStorage.removeItem(stateKey(p.id)); EXAMS.forEach(e => localStorage.removeItem(e.key + "-" + p.id)); } catch(e){}
   P.list.splice(k,1); saveProfiles(); render();
 }
+function changeAvatar(k){
+  const root = document.getElementById("modalRoot");
+  root.innerHTML = `<div class="modal"><div class="card center pop"><h2 style="margin:0 0 10px;font-size:28px">Avatar de ${esc(P.list[k].name)}</h2>
+    <div class="avatars">${AVATARS.map((a,j) => `<button class="avbtn ${a===P.list[k].av?"on":""}" onclick="setAv(${k},${j})">${a}</button>`).join("")}</div>
+    <button class="btn ghost" style="margin-top:12px" onclick="document.getElementById('modalRoot').innerHTML=''">Cerrar</button></div></div>`;
+}
+function setAv(k,j){ P.list[k].av = AVATARS[j]; saveProfiles(); document.getElementById("modalRoot").innerHTML = ""; render(); }
 function renamePlayer(k){
   const n = (prompt("Nuevo nombre:", P.list[k].name) || "").trim().slice(0,16);
   if (n){ P.list[k].name = n; saveProfiles(); render(); }
