@@ -186,6 +186,18 @@ h1,h2,h3,.pirate{font-family:"Pirata One",Georgia,serif;font-weight:400;letter-s
 .chestwrap{cursor:pointer;display:inline-block;margin:8px 0;animation:bob 1.6s ease-in-out infinite}
 .shakebig{animation:shakebig .25s infinite}
 @keyframes shakebig{25%{transform:rotate(-8deg) scale(1.05)}75%{transform:rotate(8deg) scale(1.1)}}
+.chip.who{font-size:24px;padding:2px 8px;cursor:pointer}
+.players{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.player{font:inherit;background:#fff;border:4px solid #d9c18a;border-radius:18px;padding:12px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;color:var(--ink)}
+.player .av{font-size:48px;line-height:1.1}
+.player b{font-size:16px;word-break:break-word}
+.player small{font-weight:700;opacity:.75}
+.player.on{border-color:var(--red);box-shadow:0 0 0 3px #ffd0d6}
+.player.new{border-style:dashed;background:#fff7e0}
+.player:active{transform:scale(.95)}
+.avatars{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.avbtn{font-size:28px;background:#fff;border:3px solid #e6d19b;border-radius:12px;padding:4px;cursor:pointer}
+.avbtn.on{border-color:var(--red);background:#ffe0e3}
 @media (max-width:420px){.opt{font-size:17px}.q-sentence{font-size:19px}#fx .cap{font-size:36px}}
 @media (prefers-reduced-motion:reduce){.bob,.fx-waves,.fx-flag{animation:none}}
 </style>
@@ -612,13 +624,24 @@ const PIECES_PER_TICKET = 4;
 // ==================================================================
 // ESTADO (guardado en el móvil)
 // ==================================================================
-const KEY = "glds-gran-line-1";
+// Jugadores: cada uno con su propio progreso. p1 = el jugador original (conserva sus datos)
+const PROF_KEY = "glds-profiles";
+const AVATARS = ["👒","⚔️","🍊","🎯","🍖","🦌","📚","⭐","💀","🐟","🦜","🔥"];
+let P = loadProfiles();
+function loadProfiles(){
+  try { const p = JSON.parse(localStorage.getItem(PROF_KEY)); if (p && p.list && p.list.length) return p; } catch(e){}
+  return {list:[{id:"p1", name:"CaptainLukiLufy", av:"👒"}], current:"p1"};
+}
+function saveProfiles(){ try { localStorage.setItem(PROF_KEY, JSON.stringify(P)); } catch(e){} }
+const me = () => P.list.find(x => x.id === P.current) || P.list[0];
+const stateKey = id => id === "p1" ? "glds-gran-line-1" : "glds-gran-line-" + id;
+const examKey = e => P.current === "p1" ? e.key : e.key + "-" + P.current;
 const blank = () => ({berries:0, games:0, totalOk:0, fixed:0, pieces:0,
   tickets:{earned:0, redeemed:[]}, prizes:[], chests:0, choices:0, streakGot:[], prizeOff:[], stars:{}, crono:{}, wins:{}, stats:{}, wrong:{},
   stickers:[], exams:{}, streak:{last:"", days:0}, lastIsland:"cat", sound:true, music:true, rank:0});
 let S = load();
 function load(){
-  try { const d = JSON.parse(localStorage.getItem(KEY));
+  try { const d = JSON.parse(localStorage.getItem(stateKey(P.current)));
     if (d){ const s = Object.assign(blank(), d);
       const old = s.tickets.earned - s.tickets.redeemed.length;
       for (let k=0;k<old;k++) s.prizes.push({id:"capitulo", from:"Vale antiguo", date:new Date().toLocaleDateString("es-ES")});
@@ -626,7 +649,7 @@ function load(){
       return s; } } catch(e){}
   return blank();
 }
-function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+function save(){ try { localStorage.setItem(stateKey(P.current), JSON.stringify(S)); } catch(e){} }
 
 const app = document.getElementById("app");
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -716,12 +739,12 @@ let screen = "map", familyOpen = false, G = null;
 function go(t){ stopTimer(); G = null; screen = t; render(); window.scrollTo({top:0}); }
 function render(){
   document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === screen));
-  document.getElementById("tabs").style.display = screen === "game" ? "none" : "";
+  document.getElementById("tabs").style.display = (screen === "game" || screen === "who") ? "none" : "";
   ({map:renderMap, island:renderIsland, exams:renderExams, game:renderGame, end:renderEnd,
-    treasure:renderTreasure, cine:renderCine, family:renderFamily})[screen]();
+    treasure:renderTreasure, cine:renderCine, family:renderFamily, who:renderWho})[screen]();
 }
 function hud(){
-  return `<div class="hud"><div class="title">Gran Line del Saber</div>
+  return `<div class="hud"><button class="chip who" onclick="go('who')" aria-label="Cambiar de jugador">${me().av}</button><div class="title">Gran Line del Saber</div>
     <span class="chip">💰 ${fmtB(S.berries)}</span><span class="chip" style="cursor:pointer" onclick="go('treasure')">🎁 ${S.prizes.filter(p => !p.used).length}</span>
     <button class="chip" style="cursor:pointer" onclick="toggleMusic()" aria-label="Música">${S.music && S.sound ? "🎵" : "🔇"}</button></div>`;
 }
@@ -771,7 +794,7 @@ function renderMap(){
   const r = rankIdx(S.berries);
   app.innerHTML = `${hud()}
     <div class="parrot" style="margin-top:12px"><div class="bird">${icon("parrot",62,62)}</div>
-      <div class="bubble talk">¡Hola, CaptainLukiLufy! Eres <b>${RANKS[r].n}</b>. 🔥 Racha: ${S.streak.days} día${S.streak.days===1?"":"s"}. ¡Toca una isla!</div></div>
+      <div class="bubble talk">¡Hola, ${esc(me().name)}! Eres <b>${RANKS[r].n}</b>. 🔥 Racha: ${S.streak.days} día${S.streak.days===1?"":"s"}. ¡Toca una isla!</div></div>
     ${seaCard("school")}
     ${seaCard("bonus")}`;
 }
@@ -807,7 +830,7 @@ function renderIsland(){
 }
 
 // ---------------- EXÁMENES ----------------
-function examData(e){ try { return JSON.parse(localStorage.getItem(e.key)); } catch(x){ return null; } }
+function examData(e){ try { return JSON.parse(localStorage.getItem(examKey(e))); } catch(x){ return null; } }
 function renderExams(){
   checkExams();
   const rows = EXAMS.map(e => {
@@ -889,7 +912,7 @@ function renderGame(){
   else top = `<div class="bar"><i style="width:${G.i/G.list.length*100}%"></i></div><span class="chip">${G.i+1}/${G.list.length}</span>`;
   const arena = G.mode !== "batalla" ? "" : `
     <div class="arena">
-      <div class="me" id="me">${icon("hat",80,44)}<div class="meat">${"🍖".repeat(G.lives)}${"🦴".repeat(3-G.lives)}</div><b style="font-size:10px">CaptainLukiLufy</b></div>
+      <div class="me" id="me">${icon("hat",80,44)}<div class="meat">${"🍖".repeat(G.lives)}${"🦴".repeat(3-G.lives)}</div><b style="font-size:11px">${esc(me().name)}</b></div>
       <div class="arm" id="arm"></div><div class="bang" id="bang">¡POW!</div>
       <div class="boss" id="boss"><svg width="96" height="96" style="color:${s.bossColor}"><use href="#monster"/></svg>
         <div class="hp"><i style="width:${G.boss/G.bossMax*100}%"></i></div><b style="font-size:11px">${esc(s.boss)}</b></div>
@@ -943,9 +966,9 @@ function confirmAnswer(){
   const cb = document.getElementById("checkBtn"); if (cb) cb.disabled = true;
 }
 function untap(n){ if (!G || G.locked) return; G.built.splice(n,1); renderGame(); }
-const SAY_OK = ["¡Croac! ¡Eso es!","¡Qué crack, CaptainLukiLufy!","¡Toma ya! 💥","¡Berries para el capitán!","¡Ni Zoro se pierde tan poco!","¡Eres un genio pirata!"];
+const SAY_OK = ["¡Croac! ¡Eso es!","¡Qué crack, capitán!","¡Toma ya! 💥","¡Berries para el capitán!","¡Ni Zoro se pierde tan poco!","¡Eres un genio pirata!"];
 const SAY_KO = ["¡Ups! Mira la buena 👀","¡No pasa nada, otra!","Hasta Luffy se equivoca 😅","¡Ánimo, capitán!"];
-function sayStart(){ return ["¡Vamos, CaptainLukiLufy! ¡Tú puedes!","¡Leva anclas! ⚓","Lee con calma, pirata 🦜"][G.i % 3]; }
+function sayStart(){ return [`¡Vamos, ${me().name}! ¡Tú puedes!`,"¡Leva anclas! ⚓","Lee con calma, pirata 🦜"][G.i % 3]; }
 function answer(k){
   if (!G || G.locked) return; G.locked = true;
   const q = G.q, isOrder = q.t === "order";
@@ -1065,7 +1088,7 @@ function afterRewards(extra, celebrate){
   if (r > S.rank){
     S.rank = r;
     const an = ANIMS.find(a => a.rank === r);
-    queue.push({title:"¡Tu recompensa sube!", html:`<div class="poster pop" style="width:170px"><div class="wanted" style="font-size:34px">WANTED</div>${icon("jolly",120,120)}<div class="name" style="font-size:24px">CaptainLukiLufy</div><div class="berries">฿ ${fmtB(S.berries)}</div></div>
+    queue.push({title:"¡Tu recompensa sube!", html:`<div class="poster pop" style="width:170px"><div class="wanted" style="font-size:34px">WANTED</div>${icon("jolly",120,120)}<div class="name" style="font-size:22px">${esc(me().name)}</div><div class="berries">฿ ${fmtB(S.berries)}</div></div>
       <h2 style="font-size:30px;margin:12px 0 0">Nuevo rango: ${RANKS[r].n}</h2>${an ? `<p><b>🎬 Animación desbloqueada: ${an.name}</b></p>` : ""}`, anim: an && an.id});
   }
   save();
@@ -1231,7 +1254,7 @@ function renderTreasure(){
     <div class="card center">
       <div class="poster"><div class="wanted">WANTED</div>
         <div style="background:#fff7e0;border:3px solid #b8864b;margin:6px 0;padding:6px">${icon("jolly",130,130)}</div>
-        <div class="name">CaptainLukiLufy</div><div class="berries">฿ ${fmtB(S.berries)}</div></div>
+        <div class="name">${esc(me().name)}</div><div class="berries">฿ ${fmtB(S.berries)}</div></div>
       <h2 style="font-size:30px;margin:16px 0 4px">${RANKS[r].n}</h2>
       ${nx ? `<div class="bar" style="height:14px;margin:6px 20px"><i style="width:${Math.min(100,(S.berries-RANKS[r].b)/(nx.b-RANKS[r].b)*100)}%"></i></div><p class="hint" style="margin:4px 0 0">Siguiente rango: ${nx.n} (${fmtB(nx.b)})</p>` : `<p>¡Has llegado a lo más alto! 👑</p>`}
     </div>
@@ -1298,6 +1321,13 @@ function renderFamily(){
         <button class="btn ghost" onclick="if(confirm('¿Borrar TODO el progreso de la app? (los exámenes no se borran)')){S=blank();save();familyOpen=false;go('map')}">🗑️ Reiniciar</button>
       </div>
     </div>
+    <div class="card"><h2 style="margin:0;font-size:26px">🏴‍☠️ Jugadores</h2>
+      <p class="hint" style="margin:4px 0 8px">Ahora mismo estás viendo los datos de <b>${esc(me().name)}</b>. Los premios y estadísticas de abajo son suyos.</p>
+      ${P.list.map((p,k) => `<div class="spread" style="padding:6px 0;border-bottom:1px solid #e6d19b;font-weight:800"><span>${p.av} ${esc(p.name)}${p.id===P.current?" (jugando)":""}</span>
+        <span><button class="btn ghost" style="font-size:13px;padding:4px 10px" onclick="renamePlayer(${k})">✏️</button>
+        ${p.id === "p1" || p.id === P.current ? "" : `<button class="btn ghost" style="font-size:13px;padding:4px 10px" onclick="deletePlayer(${k})">🗑️</button>`}</span></div>`).join("")}
+      <button class="btn ghost" style="margin-top:10px" onclick="go('who')">🔄 Cambiar de jugador</button>
+    </div>
     <div class="card"><h2 style="margin:0;font-size:26px">🎁 Premios que pueden salir</h2>
       <p class="hint" style="margin:4px 0 8px">Quita los que no queráis dar. Probabilidad: común 60 %, raro 28 %, épico 12 %.</p>
       ${PRIZES.map((p,k) => `<label class="spread" style="padding:6px 0;border-bottom:1px solid #e6d19b;font-weight:800">
@@ -1308,14 +1338,68 @@ function renderFamily(){
 function resetExam(k){
   const e = EXAMS[k];
   if (!confirm(`¿Borrar el intento de «${e.name}»? Podrá hacerlo otra vez desde cero (los premios ya ganados se quedan).`)) return;
-  try { localStorage.removeItem(e.key); } catch(x){}
+  try { localStorage.removeItem(examKey(e)); } catch(x){}
   delete S.exams[e.key]; save(); render();
 }
 function togglePrize(k){ const id = PRIZES[k].id, i = S.prizeOff.indexOf(id); i >= 0 ? S.prizeOff.splice(i,1) : S.prizeOff.push(id); save(); }
 
+// ---------------- JUGADORES ----------------
+function renderWho(){
+  const cards = P.list.map((p,k) => { const st = (() => { try { return JSON.parse(localStorage.getItem(stateKey(p.id))) || {}; } catch(e){ return {}; } })();
+    return `<button class="player ${p.id===P.current?"on":""}" onclick="switchPlayer(${k})"><span class="av">${p.av}</span><b>${esc(p.name)}</b>
+      <small>💰 ${fmtB(st.berries||0)} · 🔥 ${(st.streak&&st.streak.days)||0}</small></button>`; }).join("");
+  app.innerHTML = `
+    <div class="card center"><div class="float">${icon("jolly",90,90)}</div>
+      <h1 style="margin:4px 0 0;font-size:38px;color:var(--red)">¿Quién juega?</h1>
+      <p class="hint" style="margin:4px 0 12px">Cada pirata tiene sus propios berries, cromos, premios y exámenes.</p>
+      <div class="players">${cards}
+        <button class="player new" onclick="newPlayer()"><span class="av">➕</span><b>Nuevo pirata</b><small>Para un amigo o amiga</small></button></div>
+    </div>`;
+}
+function switchPlayer(k){
+  P.current = P.list[k].id; saveProfiles();
+  S = load(); familyOpen = false; G = null; sBell();
+  screen = "map"; render(); window.scrollTo({top:0}); checkExams();
+}
+function newPlayer(){
+  let av = AVATARS[(P.list.length) % AVATARS.length];
+  const root = document.getElementById("modalRoot");
+  root.innerHTML = `<div class="modal"><div class="card center pop"><h2 style="margin:0;font-size:30px">🏴‍☠️ Nuevo pirata</h2>
+    <input id="pname" maxlength="16" autocomplete="off" placeholder="Nombre de pirata"
+      style="font:inherit;font-size:20px;font-weight:900;padding:10px;border-radius:12px;border:3px solid #d9c18a;width:100%;text-align:center;margin:12px 0 8px">
+    <div class="avatars">${AVATARS.map((a,k) => `<button class="avbtn ${a===av?"on":""}" onclick="pickAv(${k})">${a}</button>`).join("")}</div>
+    <div id="pErr" style="color:var(--red);font-weight:900;min-height:22px"></div>
+    <div class="row" style="justify-content:center"><button class="btn ghost" id="pNo">Cancelar</button><button class="btn" id="pOk">¡A bordo!</button></div></div></div>`;
+  window.pickAv = k => { av = AVATARS[k]; root.querySelectorAll(".avbtn").forEach((b,j) => b.classList.toggle("on", j === k)); };
+  const inp = document.getElementById("pname"); inp.focus();
+  document.getElementById("pNo").onclick = () => root.innerHTML = "";
+  const ok = () => {
+    const name = inp.value.trim().replace(/\s+/g, " ");
+    if (!name){ document.getElementById("pErr").textContent = "Escribe un nombre 🦜"; return; }
+    if (P.list.some(p => p.name.toLowerCase() === name.toLowerCase())){ document.getElementById("pErr").textContent = "Ese nombre ya existe"; return; }
+    const id = "p" + Date.now().toString(36);
+    P.list.push({id, name, av}); saveProfiles(); root.innerHTML = "";
+    switchPlayer(P.list.length - 1);
+    showModal(`<h2 style="margin:0;font-size:30px">¡Bienvenido a bordo!</h2><div style="font-size:70px">${av}</div><h2 style="margin:0">${esc(name)}</h2>`, () => playAnim("sail"), "¡Zarpamos!");
+  };
+  document.getElementById("pOk").onclick = ok;
+  inp.onkeydown = e => { if (e.key === "Enter") ok(); };
+}
+function deletePlayer(k){
+  const p = P.list[k];
+  if (!confirm(`¿Borrar a ${p.name} y todo su progreso?`)) return;
+  try { localStorage.removeItem(stateKey(p.id)); EXAMS.forEach(e => localStorage.removeItem(e.key + "-" + p.id)); } catch(e){}
+  P.list.splice(k,1); saveProfiles(); render();
+}
+function renamePlayer(k){
+  const n = (prompt("Nuevo nombre:", P.list[k].name) || "").trim().slice(0,16);
+  if (n){ P.list[k].name = n; saveProfiles(); render(); }
+}
+
 // ---------------- ARRANQUE ----------------
 window.addEventListener("pageshow", () => { checkExams(); if (screen === "exams" || screen === "map") render(); });
 document.addEventListener("visibilitychange", () => { if (!document.hidden) checkExams(); });
+if (P.list.length > 1) screen = "who";
 render();
 if ("serviceWorker" in navigator && location.protocol !== "file:") navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>

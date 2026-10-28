@@ -250,7 +250,7 @@ function renderStart(){
   <div class="card hero center">
     <div class="float">${icon("jolly",130,130)}</div>
     <h1>L'Examen Pirata de Medi</h1>
-    <p>Ahoy, <b>CaptainLukiLufy</b>! 🏴‍☠️ Per entrar a la tripulació del barret de palla has de superar <b>${Q.length} reptes</b> de medi: les plantes i l'agricultura 🌱</p>
+    <p>Ahoy, <b>${esc(PLAYER)}</b>! 🏴‍☠️ Per entrar a la tripulació del barret de palla has de superar <b>${Q.length} reptes</b> de medi: les plantes i l'agricultura 🌱</p>
     <p class="hint">Cada resposta correcta puja la teva recompensa en 50 milions de berries 💰</p>
     <div style="display:flex;justify-content:center;gap:14px;margin:12px 0 18px;flex-wrap:wrap">
       ${icon("map",70,56)}${icon("swords",56,56)}${icon("chest",70,56)}${icon("fruit",52,56)}
@@ -313,7 +313,10 @@ function removeOrder(k){ const c = [...answers[i]]; c.splice(k,1); answers[i] = 
 function setCls(wi,ci){ const q = Q[i], w = Object.keys(q.items)[wi]; answers[i] = {...(answers[i]||{}), [w]:q.cats[ci]}; save(); render(); }
 
 // --- Guardat automàtic del progrés (al navegador)
-const SAVE_KEY = "glds-examen-medi-1";
+// Jugador activo de la app (cada pirata tiene su propio intento)
+const PROFILE = (() => { try { const p = JSON.parse(localStorage.getItem("glds-profiles")); const me = p && p.list.find(x => x.id === p.current); if (me) return me; } catch(e){} return {id:"p1", name:"CaptainLukiLufy"}; })();
+const PLAYER = PROFILE.name;
+const SAVE_KEY = "glds-examen-medi-1" + (PROFILE.id === "p1" ? "" : "-" + PROFILE.id);
 function save(finished){
   try { localStorage.setItem(SAVE_KEY, JSON.stringify({i, answers, finished: !!finished, at: Date.now(), score: score(), total: Q.length})); } catch(e){}
 }
@@ -371,7 +374,7 @@ function renderResults(){
       <div class="poster">
         <div class="wanted">WANTED</div>
         <div style="background:#fff7e0;border:3px solid #b8864b;margin:6px 0;padding:6px">${icon("jolly",150,150)}</div>
-        <div class="name">CaptainLukiLufy</div>
+        <div class="name">${esc(PLAYER)}</div>
         <div class="berries">฿ ${fmt(s*BOUNTY_PER)}</div>
       </div>
       <h2 style="font-size:34px;margin:18px 0 4px">${s} de ${total} correctes · Nota: ${nota}</h2>
@@ -394,7 +397,7 @@ function renderResults(){
         <span id="famErr" style="color:var(--red);font-weight:900"></span>
       </div>
       <div class="scroll" id="family" hidden><table>
-        <thead><tr><th>#</th><th>Pregunta</th><th>Resposta de CaptainLukiLufy</th><th>Resposta correcta</th><th></th></tr></thead>
+        <thead><tr><th>#</th><th>Pregunta</th><th>Resposta de ${esc(PLAYER)}</th><th>Resposta correcta</th><th></th></tr></thead>
         <tbody>${rows}</tbody>
       </table></div>
     </div>`;
