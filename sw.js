@@ -1,5 +1,5 @@
 // Caché para que la app funcione sin internet. Sube la versión al cambiar archivos.
-const CACHE = "gran-line-v8";
+const CACHE = "gran-line-v9";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png",
   "examenes/catala-1.html", "examenes/castellano-1.html", "examenes/medi-1.html"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
