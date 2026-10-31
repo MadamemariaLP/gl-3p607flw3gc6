@@ -368,6 +368,7 @@ const T_CAT = ["Enunciativa","Interrogativa","Exclamativa","Imperativa"];
 const GEN_CAT = ["masculí singular","femení singular","masculí plural","femení plural"];
 const T_CAS = ["Declarativa","Interrogativa","Exclamativa","Imperativa"];
 const ANIM = ["Doméstico","Marino","Insecto"];
+const FIXED_OPTS = [T_CAT, GEN_CAT, T_CAS, ANIM];
 
 const BANK = {
   // ---- Català (examen 1: fitxa T-1 i T-2)
@@ -560,6 +561,124 @@ function genMat(){
   return {q, s, o:[...opts].map(String), a:String(ans)};
 }
 
+// Preguntas generadas: mismo temario que las fichas, pero con palabras y frases que cambian cada vez
+const one = a => a[Math.floor(Math.random()*a.length)];
+const some = (a, n) => shuffle(a).slice(0, n);
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const plain = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "");
+function alphaSet(words, n){ // n palabras que empiezan por letras distintas
+  const out = [], used = new Set();
+  for (const w of shuffle(words)){ const l = plain(w)[0].toLowerCase(); if (!used.has(l)){ used.add(l); out.push(w); } if (out.length === n) break; }
+  return out;
+}
+const byAlpha = (a, lang) => a.slice().sort((x,y) => x.localeCompare(y, lang, {sensitivity:"base"}));
+const pickGen = list => one(list)();
+
+const W_CAT = ["barret","illa","mapa","pirata","tresor","vaixell","àncora","brúixola","canó","espasa","gavina","onada","platja","rem","vela","cofre","lloro","moneda","pop","sirena","tauró","fanal","corda","diccionari","escola","jardí","kiwi","nas","quadern","xocolata","ulleres","zebra","hort","dofí"];
+const N_CAT = [ // [singular, plural, gènere]
+  ["vaixell","vaixells","m"],["tresor","tresors","m"],["mapa","mapes","m"],["barret","barrets","m"],["lloro","lloros","m"],["canó","canons","m"],["rem","rems","m"],["cofre","cofres","m"],["pop","pops","m"],["tauró","taurons","m"],["llibre","llibres","m"],["gos","gossos","m"],
+  ["espasa","espases","f"],["illa","illes","f"],["vela","veles","f"],["brúixola","brúixoles","f"],["platja","platges","f"],["moneda","monedes","f"],["sirena","sirenes","f"],["gavina","gavines","f"],["onada","onades","f"],["corda","cordes","f"],["taula","taules","f"],["poma","pomes","f"]];
+const O_CAT = {
+  Enunciativa:["El Zoro té tres espases.","La Nami dibuixa un mapa.","El vaixell navega pel mar.","En Chopper és el metge.","Avui fa molt de sol.","La Robin llegeix molts llibres.","El Sanji cuina molt bé.","L'Usopp explica històries."],
+  Interrogativa:["On és el tresor?","Quants pirates hi ha?","Qui s'ha menjat la carn?","Vols venir a l'illa?","Quan arribarem al port?","Per què plora el Chopper?","Com es diu el teu vaixell?"],
+  Exclamativa:["Quin tresor tan gran!","Que bonica és l'illa!","Quina gana que tinc!","Que valent és el Luffy!","Quin vaixell tan ràpid!","Que fort que és el Zoro!"],
+  Imperativa:["Puja al vaixell ara mateix.","Tanca la porta, si us plau.","Agafa el mapa.","Neteja la coberta.","No toquis el cofre.","Seu a la cadira.","Porta l'espasa al Zoro."],
+};
+const SUJ_CAT = ["el Luffy","la Nami","el Zoro","el Sanji","la Robin","el Chopper","l'Usopp","el Franky","el cuiner del vaixell","la germana de la Nami","aquell pirata petit","el gat de la meva àvia"];
+const PRED_CAT = ["menja molta carn","dibuixa un mapa nou","neteja el vaixell","busca el tresor","llegeix un llibre","cuina un pastís","beu un suc de taronja","salta a l'aigua","canta una cançó","juga a la platja"];
+const TEMPS_CAT = ["Cada matí","Avui","A la tarda","Cada dia","Els dissabtes"];
+const PROPI_CAT = ["Girona","Barcelona","Lleida","Tarragona","Montserrat","Ebre","Luffy","Nami","Andorra","Pirineus"];
+const COMU_CAT = ["mestra","cadira","vaixell","gos","llibre","ciutat","riu","muntanya","pirata","escola"];
+function subjPred(suj, pred, temps, lang){
+  // Pregunta de subjecte o predicat; a vegades amb el temps davant (el subjecte no sempre va al principi)
+  const s = one(suj), p = one(pred), cat = lang === "ca", t = Math.random() < .35 ? one(temps) : null;
+  const frase = (t ? `${t} ${s}` : cap(s)) + " " + p + ".";
+  const S1 = t ? s : cap(s), wds = s.split(" ");
+  const dist = t ? t : wds.length >= 3 ? cap(wds.slice(0,2).join(" ")) : p.split(" ").slice(1).join(" ");
+  const askSubj = Math.random() < .6;
+  const q = cat ? (askSubj ? "Quin és el SUBJECTE?" : "Quin és el PREDICAT?") : (askSubj ? "¿Cuál es el SUJETO?" : "¿Cuál es el PREDICADO?");
+  return {q, s:frase, o:[S1, p, dist], a: askSubj ? S1 : p};
+}
+const GEN = {
+  mat: genMat,
+  cat: () => pickGen([
+    () => { const w = alphaSet(W_CAT, 4), last = Math.random() < .5, s = byAlpha(w, "ca");
+      return {q:`Quina paraula va ${last?"ÚLTIMA":"PRIMER"} en el diccionari?`, o:w, a: last ? s[3] : s[0]}; },
+    () => ({t:"order", q:"Ordena per ordre alfabètic:", w: byAlpha(alphaSet(W_CAT, rnd(4,5)), "ca")}),
+    () => { const [sg, pl, g] = one(N_CAT), plu = Math.random() < .5;
+      return {q:"Gènere i nombre de:", s: plu ? pl : sg, o:GEN_CAT, a:`${g==="m"?"masculí":"femení"} ${plu?"plural":"singular"}`}; },
+    () => { const t = one(Object.keys(O_CAT)); return {q:"Quin tipus d'oració és?", s:one(O_CAT[t]), o:T_CAT, a:t}; },
+    () => subjPred(SUJ_CAT, PRED_CAT, TEMPS_CAT, "ca"),
+    () => { const pr = Math.random() < .5; return {q:"Nom propi o nom comú?", s: pr ? one(PROPI_CAT) : one(COMU_CAT), o:["Nom propi","Nom comú"], a: pr ? "Nom propi" : "Nom comú"}; },
+    () => { const pr = one(PROPI_CAT); return {q:"Quin és un NOM PROPI?", o:shuffle(some(COMU_CAT, 3).concat(pr)), a:pr}; },
+  ]),
+  cas: () => pickGen([
+    () => { const b = Math.random() < .5, w = one(b ? ["árbol","pobre","deber","barco","botín","cambio","hombre","blanco","brazo","abuelo","bolsa","nube","libro","sombra","cabeza","tambor","bota","bandera","bucear","tobogán"] : ["favor","llave","vivir","navegar","viento","vaso","nieve","uva","nuevo","verde","volar","vela","vaca","invierno","clavo","lluvia","pavo","huevo","nave","cueva"]);
+      const L = b ? "b" : "v", idx = [...w].map((c,i) => plain(c) === L ? i : -1).filter(i => i >= 0), i = one(idx);
+      return {q:"¿Con B o con V?", s: w.slice(0,i) + "_" + w.slice(i+1), o:["B","V"], a: L.toUpperCase()}; },
+    () => { const G = {barco:["ancla","vela","mástil","timón","remo","cubierta"], cocina:["cuchara","tenedor","vaso","plato","cazo","sartén"], transporte:["coche","avión","tren","bicicleta","autobús","moto"], fruta:["fresa","uva","melocotón","plátano","pera","manzana"], ropa:["camiseta","pantalón","calcetín","gorro","bufanda","falda"], escuela:["lápiz","goma","cuaderno","regla","mochila","estuche"]};
+      const [g1, g2] = some(Object.keys(G), 2), odd = one(G[g2]), w = shuffle(some(G[g1], 3).concat(odd));
+      return {q:"¿Qué palabra NO es del mismo campo semántico?", s:w.join(" – "), o:w, a:odd}; },
+    () => { const A = {"Doméstico":["cobaya","canario","perro","gato","hámster","conejo","periquito"], "Marino":["pez payaso","medusa","tiburón","pulpo","delfín","ballena","estrella de mar","cangrejo"], "Insecto":["libélula","grillo","hormiga","abeja","mariposa","mosca","mariquita","saltamontes"]};
+      const g = one(ANIM); return {q:"¿En qué grupo va?", s:one(A[g]), o:ANIM, a:g}; },
+    () => { const O = {Declarativa:["Chopper es el médico del barco.","Nami dibuja mapas.","El barco navega por el mar.","Zoro tiene tres espadas.","Hoy hace mucho sol.","Sanji cocina muy bien."], Interrogativa:["¿Dónde está el tesoro?","¿Cuántos piratas hay?","¿Quién se ha comido la carne?","¿Quieres venir a la isla?","¿Cuándo llegamos al puerto?","¿Por qué llora Chopper?"], Exclamativa:["¡Qué barco tan bonito!","¡Qué hambre tengo!","¡Qué valiente es Luffy!","¡Cuánto tesoro hay aquí!","¡Qué rápido navegamos!"], Imperativa:["No hagas ruido en la biblioteca.","Sube al barco ahora mismo.","Cierra la puerta, por favor.","Coge el mapa.","Limpia la cubierta.","No toques el cofre."]};
+      const t = one(T_CAS); return {q:"¿Qué tipo de oración es?", s:one(O[t]), o:T_CAS, a:t}; },
+    () => { const V = [["come","comió","comerá","mucha carne"],["pinta","pintó","pintará","un cuadro"],["nada","nadó","nadará","en el mar"],["dibuja","dibujó","dibujará","un mapa"],["canta","cantó","cantará","una canción"],["juega","jugó","jugará","al fútbol"],["lee","leyó","leerá","un libro"],["salta","saltó","saltará","al agua"],["marca","marcó","marcará","un gol"]];
+      const [pr, pa, fu, c] = one(V), s = one(["Luffy","Nami","Zoro","Sanji","Robin","Chopper","Usopp","Elena","Óscar"]);
+      if (Math.random() < .5) return {q:"¿Qué frase está en PASADO?", o:[`${s} ${pr} ${c}.`, `${s} ${pa} ${c}.`, `${s} ${fu} ${c}.`], a:`${s} ${pa} ${c}.`};
+      return {q:"Pasa a pasado:", s:`${s} ${pr} ${c}.`, o:[`${s} ${fu} ${c}.`, `${s} ${pa} ${c}.`, `${s} ${pa.replace(/ó$/,"o")} ${c}.`], a:`${s} ${pa} ${c}.`}; },
+    () => subjPred(["Luffy","Nami","Zoro","el cocinero del barco","aquel pirata pequeño","mi prima","el gato de mi abuela","la profesora de música"], ["come mucha carne","dibuja un mapa nuevo","limpia el barco","busca el tesoro","lee un libro","prepara la cena","bebe zumo de naranja","salta al agua","canta una canción"], ["Cada mañana","Hoy","Por la tarde","Los viernes"], "es"),
+    () => { const w = alphaSet(["ancla","barco","cofre","delfín","espada","faro","gaviota","isla","loro","mapa","nube","ola","pirata","remo","sirena","tesoro","vela","zapato"], 4);
+      return {t:"order", q:"Ordena por orden alfabético:", w: byAlpha(w, "es")}; },
+  ]),
+  med: () => pickGen([
+    () => { const pl = Math.random() < .55; return {q:"Ve de les plantes o dels animals?", s: one(pl ? ["tomàquet","arròs","blat","poma","enciam","patata","pastanaga","oli d'oliva","pa","préssec","taronja","cigrons","pèsols"] : ["llet","ous","formatge","pernil","iogurt","mel","carn","pollastre","peix"]), o:["Plantes","Animals"], a: pl ? "Plantes" : "Animals"}; },
+    () => { const se = Math.random() < .5; return {q:"Secà o regadiu?", s: one(se ? ["olivera","vinya","ametller","blat","ordi","garrofer"] : ["arròs","enciam","tomàquet","blat de moro","pomera","presseguer","maduixa"]), o:["Secà","Regadiu"], a: se ? "Secà" : "Regadiu"}; },
+    () => { const C = ["blat","blat de moro","arròs","tomàquets","enciams","maduixes","pebrots","carbassons","mongetes","patates"];
+      if (Math.random() < .5) return {q:"Monocultiu o policultiu?", s:`Un camp només de ${one(C)}.`, o:["monocultiu","policultiu"], a:"monocultiu"};
+      const [a, b, c] = some(C, 3); return {q:"Monocultiu o policultiu?", s:`Un hort amb ${a}, ${b} i ${c}.`, o:["monocultiu","policultiu"], a:"policultiu"}; },
+    () => { const F = {"el relleu":["És una zona molt plana.","Hi ha muntanyes molt altes.","El camp és en una vall.","El terreny fa molta pujada."], "el sòl":["La terra és fosca i té molts nutrients.","La terra és plena de pedres.","La terra és molt seca i dura.","La terra és tova i bona per sembrar."], "el clima":["Plou molt i fa calor.","Fa molt de fred tot l'any.","Gairebé no plou mai.","A l'estiu fa sol i a l'hivern neva."]};
+      const f = one(Object.keys(F)); return {q:"De quin factor parlem: relleu, sòl o clima?", s:one(F[f]), o:["el relleu","el sòl","el clima"], a:f}; },
+    () => ({t:"order", q:"Ordena per ordre alfabètic:", w: byAlpha(alphaSet(["arròs","blat","ceba","enciam","maduixa","olivera","patata","raïm","tomàquet","vinya","pagès","sòl","clima","relleu"], 4), "ca")}),
+  ]),
+  gen: () => pickGen([
+    () => { const C = [["España","Madrid"],["Francia","París"],["Italia","Roma"],["Portugal","Lisboa"],["Alemania","Berlín"],["Reino Unido","Londres"],["Japón","Tokio"],["Grecia","Atenas"],["Egipto","El Cairo"],["Argentina","Buenos Aires"],["Estados Unidos","Washington"],["China","Pekín"],["Rusia","Moscú"],["Perú","Lima"],["Colombia","Bogotá"],["Chile","Santiago"],["Marruecos","Rabat"],["Países Bajos","Ámsterdam"],["Irlanda","Dublín"],["Andorra","Andorra la Vella"]];
+      const [p, c] = one(C), o = shuffle(some(C.filter(x => x[1] !== c), 3).map(x => x[1]).concat(c));
+      return {q:`¿Cuál es la capital de ${p}?`, o, a:c}; },
+    () => { const A = {"Mamífero":["delfín","murciélago","ballena","perro","elefante","vaca"], "Ave":["pingüino","águila","gallina","loro","avestruz","gaviota"], "Reptil":["tortuga","cocodrilo","serpiente","lagarto","camaleón"], "Pez":["tiburón","salmón","atún","pez payaso","sardina"], "Anfibio":["rana","sapo","salamandra","tritón"]};
+      const g = one(Object.keys(A)); return {q:"¿Qué tipo de animal es?", s:one(A[g]), o:Object.keys(A), a:g}; },
+    () => { const F = [["triángulo","3"],["cuadrado","4"],["pentágono","5"],["hexágono","6"],["octógono","8"]], [f, n] = one(F);
+      return {q:`¿Cuántos lados tiene un ${f}?`, o:["3","4","5","6","8"], a:n}; },
+    () => { const P = ["Mercurio","Venus","Tierra","Marte","Júpiter","Saturno","Urano","Neptuno"], k = rnd(0,7), ord = ["1º","2º","3º","4º","5º","6º","7º","8º"];
+      return {q:`¿Qué planeta es el ${ord[k]} más cercano al Sol?`, o:shuffle(some(P.filter(x => x !== P[k]), 3).concat(P[k])), a:P[k]}; },
+    () => { const T = [["¿Cuántos días tiene una semana?","7"],["¿Cuántos meses tiene un año?","12"],["¿Cuántas horas tiene un día?","24"],["¿Cuántos segundos tiene un minuto?","60"],["¿Cuántos días tiene un año?","365"],["¿Cuántas patas tiene una araña?","8"],["¿Cuántas patas tiene un insecto?","6"],["¿Cuántas estaciones tiene el año?","4"],["¿Cuántos continentes hay (contando la Antártida)?","7"]];
+      const [t, n] = one(T), o = new Set([n]); for (const x of shuffle(T)) { if (o.size >= 4) break; o.add(x[1]); }
+      return {q:t, o:shuffle([...o]), a:n}; },
+  ]),
+  eng: () => pickGen([
+    () => engWord(true), () => engWord(false),
+    () => { const S = [["I","am"],["You","are"],["He","is"],["She","is"],["It","is"],["We","are"],["They","are"]], [p, v] = one(S), c = one(["happy","a pirate","hungry","at school","on the ship","tired","friends"]);
+      if ((p === "I" || p === "He" || p === "She" || p === "It") && c === "friends") return {q:"Completa:", s:`I ___ a pirate.`, o:["am","is","are"], a:"am"};
+      return {q:"Completa:", s:`${p} ___ ${c}.`, o:["am","is","are"], a:v}; },
+    () => { const S = [["I","play"],["You","play"],["He","plays"],["She","plays"],["We","play"],["They","play"]], [p, v] = one(S), [base, obj] = one([["play","football"],["eat","pizza"],["read","books"],["swim","in the sea"],["like","pirates"],["drink","milk"]]);
+      const s3 = base === "play" ? "plays" : base + "s", ans = v === "plays" ? s3 : base;
+      return {q:"Completa:", s:`${p} ___ ${obj}.`, o:[base, s3], a:ans}; },
+  ]),
+};
+const VOC = { // [inglés, español]
+  colores:[["red","rojo"],["blue","azul"],["green","verde"],["yellow","amarillo"],["black","negro"],["white","blanco"],["orange","naranja"],["pink","rosa"],["purple","morado"],["brown","marrón"]],
+  números:[["one","1"],["two","2"],["three","3"],["four","4"],["five","5"],["six","6"],["seven","7"],["eight","8"],["nine","9"],["ten","10"],["eleven","11"],["twelve","12"],["twenty","20"]],
+  animales:[["dog","perro"],["cat","gato"],["bird","pájaro"],["fish","pez"],["horse","caballo"],["cow","vaca"],["monkey","mono"],["shark","tiburón"],["parrot","loro"],["rabbit","conejo"],["mouse","ratón"],["turtle","tortuga"]],
+  piratas:[["ship","barco"],["treasure","tesoro"],["island","isla"],["map","mapa"],["sword","espada"],["sea","mar"],["captain","capitán"],["flag","bandera"],["gold","oro"],["wave","ola"],["hat","sombrero"],["friend","amigo"]],
+  casa:[["kitchen","cocina"],["bedroom","dormitorio"],["bathroom","baño"],["door","puerta"],["window","ventana"],["table","mesa"],["chair","silla"],["bed","cama"]],
+  cuerpo:[["head","cabeza"],["hand","mano"],["foot","pie"],["eye","ojo"],["mouth","boca"],["nose","nariz"],["ear","oreja"],["arm","brazo"]],
+};
+function engWord(toEs){
+  const cat = one(Object.keys(VOC)), [en, es] = one(VOC[cat]), others = some(VOC[cat].filter(x => x[0] !== en), 3);
+  return toEs ? {q:`¿Qué significa «${en}»?`, o:shuffle(others.map(x => x[1]).concat(es)), a:es}
+              : {q:`¿Cómo se dice «${es}» en inglés?`, o:shuffle(others.map(x => x[0]).concat(en)), a:en};
+}
+
 // ==================================================================
 // PREMIOS
 // ==================================================================
@@ -623,6 +742,8 @@ const RARITY = {1:{n:"Común", c:"#2f86d9"}, 2:{n:"Raro", c:"#8e44ad"}, 3:{n:"¡
 const STREAK_GOALS = [3,5,7,10,14,21,30];   // días seguidos en los que elige premio
 const FAMILY_PIN = "2026";
 const PIECES_PER_TICKET = 4;
+// Límite de cofres al día (jugando y con exámenes). Lo que sobra espera cerrado hasta mañana (máx. MAX_LOCKED)
+const DAILY_CHESTS = 2, MAX_LOCKED = 1;
 
 // ==================================================================
 // ESTADO (guardado en el móvil)
@@ -642,7 +763,8 @@ const stateKey = id => id === "p1" ? "glds-gran-line-1" : "glds-gran-line-" + id
 const examKey = e => P.current === "p1" ? e.key : e.key + "-" + P.current;
 const blank = () => ({berries:0, games:0, totalOk:0, fixed:0, pieces:0,
   tickets:{earned:0, redeemed:[]}, prizes:[], chests:0, choices:0, streakGot:[], prizeOff:[], stars:{}, crono:{}, wins:{}, stats:{}, wrong:{},
-  stickers:[], exams:{}, streak:{last:"", days:0}, lastIsland:"cat", sound:true, music:true, rank:0});
+  stickers:[], exams:{}, streak:{last:"", days:0}, lastIsland:"cat", sound:true, music:true, rank:0,
+  day:{d:"", chests:0}, locked:0, dailyMax:DAILY_CHESTS, examBest:{}, seenAt:{}});
 let S = load();
 function load(){
   try { const d = JSON.parse(localStorage.getItem(stateKey(P.current)));
@@ -829,7 +951,9 @@ function renderIsland(){
     </div>
     <div class="card"><b>Premios de esta isla</b>
       <p class="hint" style="margin:6px 0 0">🥉🥈🥇 medalla según las estrellas · 👑 Maestro: 3⭐ + ganar una batalla + 12 en contrarreloj.<br>
-      🧩 Ganas una pieza de mapa con 3⭐, con cada batalla ganada o con 12+ en contrarreloj. ${PIECES_PER_TICKET} piezas = 🎁 cofre con premio sorpresa.</p>
+      🧩 Ganas una pieza de mapa con 3⭐, con cada batalla ganada o con 12+ en contrarreloj. ${PIECES_PER_TICKET} piezas = 🎁 cofre con premio sorpresa.<br>
+      🚢 Tu barco carga ${S.dailyMax} cofre${S.dailyMax===1?"":"s"} al día. ¡Si sigues jugando, el siguiente te espera mañana!</p>
+      <p style="font-weight:900;margin:6px 0 0">${bodega()}</p>
     </div>`;
 }
 
@@ -849,21 +973,24 @@ function renderExams(){
   }).join("");
   app.innerHTML = `${hud()}
     <div class="card center"><h2 style="margin:0;font-size:34px">🏰 Isla de los Exámenes</h2>
-      <p style="margin:6px 0 0">Exámenes de verdad, sacados de tus fichas del cole.<br><b>Nota 7 o más = 🎁 cofre con premio sorpresa</b> y muchos berries.</p></div>
+      <p style="margin:6px 0 0">Exámenes de verdad, sacados de tus fichas del cole.<br><b>Tu mejor nota (7 o más) = 🎁 cofre con premio sorpresa</b> y muchos berries.</p></div>
     ${rows}
     <button class="btn ghost" style="margin-top:16px" onclick="go('map')">◀ Volver al mapa</button>`;
 }
 function checkExams(){
-  const unlocked = [];
+  newDay();
   EXAMS.forEach(e => {
     const d = examData(e);
     if (!d || !d.finished) return;
     const tag = String(d.at||0);
     if (S.exams[e.key] && S.exams[e.key].at === tag) return;
     const nota = d.total ? d.score/d.total*10 : null;
+    // cofre solo si es su mejor nota en ese examen (repetir el mismo examen no da más cofres)
+    const best = S.examBest[e.key] != null ? S.examBest[e.key] : (S.exams[e.key] && S.exams[e.key].nota) || 0;
     S.exams[e.key] = {at:tag, nota};
     S.berries += d.total ? d.score * 20e6 : 100e6;
-    if (nota != null && nota >= 7){ S.chests++; S.chestFrom = `${e.name} (nota ${nota.toFixed(1).replace(".",",")})`; }
+    if (nota != null && nota > best){ S.examBest[e.key] = nota;
+      if (nota >= 7) earnChest(`${e.name} (nota ${nota.toFixed(1).replace(".",",")})`); }
   });
   save();
   if (S.chests || S.choices) afterRewards([]);
@@ -872,23 +999,36 @@ function checkExams(){
 // ---------------- JUEGO ----------------
 let timer = null;
 function stopTimer(){ if (timer){ clearInterval(timer); timer = null; } }
+// Cada pregunta guarda cuándo salió (S.seenAt) para que la próxima vez salgan primero las que hace más que no ve
+const qKey = q => q.t === "order" ? q.q + "|" + q.w.join(" ") : wrongKey(q);
+function freshest(list, id, n){
+  const seen = S.seenAt[id] || {};
+  return list.map(q => ({q, t:(seen[qKey(q)]||0) + Math.random()*36e5})).sort((a,b) => a.t - b.t).slice(0, n).map(x => x.q);
+}
+function genQ(id, avoid, noOrder){
+  const seen = S.seenAt[id] || {};
+  let q;
+  for (let k=0;k<15;k++){ q = GEN[id]();
+    if (noOrder && q.t === "order") continue;
+    const key = qKey(q); if (!avoid.has(key) && Date.now() - (seen[key]||0) > 2*864e5) break; }
+  return q;
+}
 function drawQ(id, excludeVideo){
-  if (id === "mat") return genMat();
-  const pool = BANK[id].filter(q => !(excludeVideo && (q.v || (G && G.mode === "crono" && q.t === "order"))));
-  const recent = G ? G.seen : [];
-  const fresh = pool.filter(q => !recent.includes(q));
-  const from = fresh.length ? fresh : pool;
-  return from[Math.floor(Math.random()*from.length)];
+  const noOrder = G && G.mode === "crono", avoid = new Set(G ? G.seen.map(qKey) : []);
+  if (id === "mat" || Math.random() < .6) return genQ(id, avoid, noOrder);
+  const ok = q => !(excludeVideo && (q.v || (noOrder && q.t === "order")));
+  const pool = BANK[id].filter(q => ok(q) && !avoid.has(qKey(q)));
+  return one(freshest(pool.length ? pool : BANK[id].filter(ok), id, 4));
 }
 function startGame(mode){
   const id = S.lastIsland;
   G = {id, mode, i:0, ok:0, ko:0, combo:0, seen:[], list:null, built:[], lives:3, boss:8, bossMax:8, locked:false, newUnlocks:[]};
   if (mode === "aventura"){
-    if (id === "mat") G.list = Array.from({length:10}, genMat);
-    else {
-      const vids = shuffle(BANK[id].filter(q => q.v)).slice(0,1);
-      G.list = shuffle(shuffle(BANK[id].filter(q => !q.v)).slice(0, 10 - vids.length).concat(vids));
-    }
+    // mitad preguntas de la ficha (las que hace más que no salen) y mitad generadas nuevas
+    const vids = freshest(BANK[id].filter(q => q.v), id, 1), list = freshest(BANK[id].filter(q => !q.v), id, 5).concat(vids);
+    const avoid = new Set(list.map(qKey));
+    while (list.length < 10){ const q = genQ(id, avoid); avoid.add(qKey(q)); list.push(q); }
+    G.list = shuffle(list);
   }
   if (mode === "repaso") G.list = shuffle(S.wrong[id] || []).slice(0, 10);
   if (mode === "crono"){ G.end = Date.now() + 60000;
@@ -904,8 +1044,10 @@ function nextQ(){
   const q = G.list ? G.list[G.i] : drawQ(G.id, true);
   G.q = q; G.built = [];
   if (q.t === "order"){ let w; do { w = shuffle(q.w); } while (w.join() === q.w.join()); G.opts = w; }
-  else G.opts = (G.id === "mat" || q.o.length > 4) ? shuffle(q.o) : q.o.slice();
-  G.seen.push(q); if (G.seen.length > 12) G.seen.shift();
+  // las respuestas cambian de sitio (menos las listas fijas: tipos de oración, B/V, grupos…)
+  else G.opts = q.o.length === 2 || FIXED_OPTS.some(f => f.join() === q.o.join()) ? q.o.slice() : shuffle(q.o);
+  G.seen.push(q); if (G.seen.length > 30) G.seen.shift();
+  (S.seenAt[G.id] = S.seenAt[G.id] || {})[qKey(q)] = Date.now();
   G.locked = false; G.sel = null;
 }
 function renderGame(){
@@ -1042,9 +1184,20 @@ function finish(){
     if (G.won){ S.wins[id] = (S.wins[id]||0) + 1; piece += SUBJ[id].zone === "bonus" ? 2 : 1; S.berries += 50e6; msgs.push(`¡Has derrotado a ${SUBJ[id].boss}! +50 M de berries`); }
   }
   if (G.mode === "repaso"){ good = G.ok >= G.ko; if (!(S.wrong[id]||[]).length) msgs.push("¡Chopper ha curado todos tus errores de esta isla! 🩺"); }
-  if (piece){ S.pieces += piece; msgs.push("🧩 ¡Has ganado una pieza de mapa!"); }
-  while (S.pieces >= PIECES_PER_TICKET){ S.pieces -= PIECES_PER_TICKET; S.chests++; S.chestFrom = "Mapa completo 🧩"; msgs.push("🎁 ¡Mapa completo! ¡Has encontrado un COFRE DEL TESORO!"); }
+  newDay();
+  // con la bodega llena (cofres de hoy + el de mañana) ya no se ganan piezas hasta el día siguiente
+  const full = S.day.chests >= S.dailyMax && S.locked >= MAX_LOCKED;
+  if (piece && full) msgs.push("⚓ ¡Tu barco ya va cargado de cofres! Hoy juegas por los berries y la gloria. Mañana, ¡más piezas de mapa!");
+  else if (piece){ S.pieces += piece; msgs.push("🧩 ¡Has ganado una pieza de mapa!"); }
+  while (S.pieces >= PIECES_PER_TICKET){
+    const r = earnChest("Mapa completo 🧩");
+    if (r === "full"){ S.pieces = PIECES_PER_TICKET - 1; break; }
+    S.pieces -= PIECES_PER_TICKET;
+    msgs.push(r === "open" ? "🎁 ¡Mapa completo! ¡Has encontrado un COFRE DEL TESORO!" : "🔒 ¡Mapa completo! Ya has abierto los cofres de hoy: este se queda en la bodega y se abre MAÑANA.");
+  }
   S.games++;
+  // no guardar más de 400 preguntas vistas por isla (las más antiguas se olvidan)
+  Object.keys(S.seenAt).forEach(k => { const e = Object.entries(S.seenAt[k]); if (e.length > 400) S.seenAt[k] = Object.fromEntries(e.sort((a,b) => b[1]-a[1]).slice(0, 400)); });
   const t = today(), y = new Date(Date.now()-864e5).toLocaleDateString("sv");
   if (S.streak.last !== t){ S.streak.days = S.streak.last === y ? S.streak.days + 1 : 1; S.streak.last = t;
     if (S.streak.days === 1) S.streakGot = [];
@@ -1107,6 +1260,25 @@ function afterRewards(extra, celebrate){
   next();
 }
 // ---------------- PREMIOS SORPRESA ----------------
+// Día nuevo: se vacía la bodega y el cofre que esperaba cerrado se abre (cuenta como uno de los de hoy)
+function newDay(){
+  if (S.day.d === today()) return;
+  S.day = {d:today(), chests:0};
+  if (S.locked){ S.chests += S.locked; S.day.chests += S.locked; S.locked = 0; S.chestFrom = "Cofre guardado en la bodega 🔓"; }
+  save();
+}
+// "open" = cofre para abrir ya · "locked" = se abre mañana · "full" = ni hoy ni mañana caben más
+function earnChest(from){
+  newDay();
+  if (S.day.chests < S.dailyMax){ S.day.chests++; S.chests++; S.chestFrom = from; return "open"; }
+  if (S.locked < MAX_LOCKED){ S.locked++; return "locked"; }
+  return "full";
+}
+function bodega(){
+  newDay();
+  const left = Math.max(0, S.dailyMax - S.day.chests);
+  return `⚓ Cofres de hoy: ${"🎁".repeat(S.day.chests)}${"▫️".repeat(left)}${S.locked ? ` · 🔒 ${S.locked} esperando a mañana` : ""}`;
+}
 const activePrizes = () => PRIZES.filter(p => !S.prizeOff.includes(p.id));
 function rollPrize(exclude=[]){
   const pool = activePrizes().filter(p => !exclude.includes(p.id));
@@ -1263,8 +1435,9 @@ function renderTreasure(){
       ${nx ? `<div class="bar" style="height:14px;margin:6px 20px"><i style="width:${Math.min(100,(S.berries-RANKS[r].b)/(nx.b-RANKS[r].b)*100)}%"></i></div><p class="hint" style="margin:4px 0 0">Siguiente rango: ${nx.n} (${fmtB(nx.b)})</p>` : `<p>¡Has llegado a lo más alto! 👑</p>`}
     </div>
     <div class="card"><h2 style="margin:0;font-size:28px">🎁 Mis premios</h2>
-      <p class="hint" style="margin:4px 0">🧩 ${PIECES_PER_TICKET} piezas de mapa o un 7 en un examen = cofre sorpresa. 🔥 Con racha de días ¡eliges tú!</p>
+      <p class="hint" style="margin:4px 0">🧩 ${PIECES_PER_TICKET} piezas de mapa o tu mejor nota (7 o más) en un examen = cofre sorpresa. 🔥 Con racha de días ¡eliges tú!</p>
       <p class="pieces" style="margin:4px 0">${"🧩".repeat(S.pieces)}${"▫️".repeat(PIECES_PER_TICKET - S.pieces)}</p>
+      <p style="font-weight:900;margin:4px 0">${bodega()}</p>
       <p style="font-weight:900;margin:4px 0">🔥 Racha: ${S.streak.days} día${S.streak.days===1?"":"s"}${nextGoal ? ` · elige premio a los ${nextGoal} días` : ""}</p>
       ${mine || `<p class="hint">Todavía no tienes premios. ¡A navegar!</p>`}
       ${used}
@@ -1318,6 +1491,8 @@ function renderFamily(){
       <p style="margin:6px 0">Premios: <b>${S.prizes.length}</b> ganados, <b>${S.prizes.filter(x=>x.used).length}</b> canjeados</p>
       <ul style="margin:6px 0;padding-left:20px">${exams}</ul>
       <p class="hint">Las respuestas de cada examen están al final del examen, con el mismo código.</p>
+      <p style="margin:10px 0 4px"><b>Cofres al día</b> (jugando y con exámenes; el que sobra espera a mañana, máx. ${MAX_LOCKED}). Hoy: <b>${S.day.d === today() ? S.day.chests : 0}</b>${S.locked ? ` · 🔒 ${S.locked} para mañana` : ""}</p>
+      <div class="row" style="margin-bottom:10px">${[1,2,3,4].map(n => `<button class="btn ${S.dailyMax===n?"":"ghost"}" style="font-size:15px;padding:6px 14px" onclick="setDailyMax(${n})">${n}</button>`).join("")}</div>
       <div class="row">
         <button class="btn ghost" onclick="S.chests++;S.chestFrom='Regalo de la familia 💝';save();afterRewards([])">🎁 Regalar un cofre</button>
         <button class="btn ghost" onclick="testSound()">🔔 Probar sonido</button>
@@ -1346,6 +1521,7 @@ function resetExam(k){
   try { localStorage.removeItem(examKey(e)); } catch(x){}
   delete S.exams[e.key]; save(); render();
 }
+function setDailyMax(n){ S.dailyMax = n; save(); render(); }
 function togglePrize(k){ const id = PRIZES[k].id, i = S.prizeOff.indexOf(id); i >= 0 ? S.prizeOff.splice(i,1) : S.prizeOff.push(id); save(); }
 
 // ---------------- JUGADORES ----------------
