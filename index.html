@@ -183,6 +183,18 @@ h1,h2,h3,.pirate{font-family:"Pirata One",Georgia,serif;font-weight:400;letter-s
 .world .we{font-size:30px;line-height:1}.world b{display:block;font-size:16px;margin-top:4px}.world .ws{font-size:14px;color:#b8860b;font-weight:900}
 .world .xt{display:inline-block;font-size:11px;font-weight:900;background:#8e44ad;color:#fff;border-radius:999px;padding:1px 8px;margin-top:3px}
 .learn li{margin:8px 0;font-size:17px;line-height:1.35}
+.dcard{background:#fff;border:3px solid #d9c18a;border-radius:16px;padding:10px 12px;margin-top:10px}
+.dcard.es{border-left:10px solid #1f6fd1} .dcard.ca{border-left:10px solid #d7263d}
+.drow{display:grid;grid-template-columns:1fr 1fr;gap:8px} .drow .btn{font-size:16px;padding:8px 8px;margin:0} .drow .btn:last-child{grid-column:1/-1}
+.dst{color:#b8860b;font-size:14px;letter-spacing:-1px}
+.dict-ear{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:6px 0 12px}
+.dict-in{display:block;width:100%;box-sizing:border-box;font:inherit;font-size:26px;font-weight:800;padding:12px 14px;border:3px solid #d9c18a;border-radius:14px;background:#fff;color:var(--ink);text-align:center;outline:none}
+.dict-in:focus{border-color:var(--sea2)} textarea.dict-in{font-size:21px;text-align:left;resize:none;line-height:1.35}
+.dict-in.good{border-color:var(--green);background:#eaffea} .dict-in.bad{border-color:var(--red);background:#ffecec}
+.dcmp{background:#fff;border-radius:14px;padding:10px 12px;margin-top:8px;font-size:22px;text-align:left;color:var(--ink);line-height:1.5}
+.dcmp small{font-size:14px;color:#8a6a3b} .dcmp .x{color:var(--red);text-decoration:line-through} .dcmp .m{background:#ffe066;border-radius:4px;padding:0 2px;color:var(--green)}
+.dtip{background:#fff7d6;border:2px dashed var(--wood);border-radius:12px;padding:8px 10px;margin-top:8px;font-size:16px;font-weight:700;color:var(--ink);text-align:left}
+.dbig{font-size:30px;font-weight:900;text-align:center;background:#fff;border-radius:14px;padding:14px;border:3px solid var(--green)}
 .rev{background:linear-gradient(160deg,#eaffd9,#c8f0a8);border:4px solid #3f7f2c;border-radius:18px;padding:12px;margin-top:12px}
 .prize.r4{background:linear-gradient(160deg,#ffe3e6,#ffd36b,#c9f0ff);animation:pop .5s,glow .9s ease-in-out infinite}
 @keyframes glow{50%{box-shadow:0 0 22px 6px #f5b700}}
@@ -366,6 +378,7 @@ h1,h2,h3,.pirate{font-family:"Pirata One",Georgia,serif;font-weight:400;letter-s
 const SUBJ = {
   cat: {zone:"school", name:"Illa del Català",      short:"Català",     emoji:"📕", color:"#d7263d", boss:"El Pop de les Faltes",  bossColor:"#c0392b"},
   cas: {zone:"school", name:"Isla del Castellano",  short:"Castellano", emoji:"📘", color:"#1f6fd1", boss:"El Kraken Gramatical",  bossColor:"#2e86c1"},
+  dic: {zone:"school", name:"Isla de los Dictados", short:"Dictados",   emoji:"✍️", color:"#e07a12", boss:"", bossColor:"#e07a12"},
   med: {zone:"school", name:"Illa del Medi",       short:"Medi",       emoji:"🌱", color:"#6ab04c", boss:"La Mala Herba Gegant",  bossColor:"#6ab04c"},
   mat: {zone:"bonus", name:"Isla de los Números",  short:"Mates",      emoji:"✖️", color:"#2a9d5b", boss:"El Rey Multiplicón",    bossColor:"#27ae60"},
   gen: {zone:"bonus", name:"Isla del Saber",       short:"Cultura",    emoji:"🌍", color:"#e07a12", boss:"El Almirante Preguntón",bossColor:"#d35400"},
@@ -870,6 +883,101 @@ const EXAMS = [
   {key:"glds-examen-castellano-1", file:"examenes/castellano-1.html", name:"Examen Pirata de Castellano", sub:"Ficha repaso T-1"},
   {key:"glds-examen-medi-1",       file:"examenes/medi-1.html",       name:"Examen Pirata de Medi", sub:"Les plantes: l'agricultura"},
 ];
+// ---------------- DICTADOS (Isla de los Dictados) ----------------
+//   La voz del móvil dicta y el pirata lo escribe. lang: es / ca
+//   w: "palabra|frase de ayuda" (la frase se dice después, para saber qué palabra es)
+//   f: frases del dictado (en el orden de la ficha) · tip: el truco que se enseña al fallar
+const DICT = [
+  {id:"cas-quijote", lang:"es", ficha:"10/11/26", name:"Dictado del Quijote", sub:"B y V · tildes", tip:"Los verbos que acaban en <b>-aba</b> van con <b>B</b>: montaba, pastaba, llevaba. Llevan tilde: <b>bacía, cántaro, salió</b>.",
+   w:["vieja|Una vieja bacía.","bacía|Su yelmo era en realidad una bacía.","montaba|Don Quijote montaba a su caballo.","caballo|El caballo de Don Quijote.","vio|Don Quijote vio un carnero.",
+      "pastaba|El carnero pastaba tranquilo.","llevaba|Sancho llevaba un cántaro.","velocidad|Salió a toda velocidad.","cántaro|Un cántaro lleno de agua.","salió|Don Quijote salió al galope.",
+      "yelmo|Se puso su yelmo.","Quijote|Don Quijote de la Mancha.","Sancho Panza|Sancho Panza es su escudero.","tranquilo|El carnero pastaba tranquilo.","persiguiendo|Iba persiguiendo un molino.",
+      "galope|Salió al galope.","molino|Las aspas de un molino.","mientras|Mientras montaba a su caballo.","realidad|En realidad era una bacía.","carnero|Vio un carnero."],
+   f:["Don Quijote se puso su yelmo, que en realidad era una vieja bacía.",
+      "Mientras montaba a su caballo, vio un carnero que pastaba tranquilo.",
+      "Sancho Panza llevaba un cántaro lleno de agua para calmar la sed.",
+      "A toda velocidad, Don Quijote salió al galope, persiguiendo las aspas de un molino."]},
+  {id:"cas-bv", lang:"es", name:"La B y la V", sub:"mb · nv · -aba · bu-", tip:"Antes de <b>B</b> se escribe <b>M</b> (ambulancia) y antes de <b>V</b> se escribe <b>N</b> (invierno). Los verbos en <b>-aba</b> y las palabras que empiezan por <b>bu-, bus-, bur-</b> van con <b>B</b>.",
+   w:["ambulancia|La ambulancia lleva a los enfermos.","invierno|En invierno hace frío.","bombero|El bombero apaga el fuego.","enviar|Voy a enviar una carta.","cantaban|Los piratas cantaban en el barco.",
+      "burbuja|Una burbuja de jabón.","buscar|Vamos a buscar el tesoro.","abuelo|Mi abuelo cuenta cuentos.","avión|El avión vuela muy alto.","nube|Una nube blanca.",
+      "viento|El viento mueve las velas.","volar|Los pájaros saben volar.","árbol|El árbol tiene muchas hojas.","hierba|La vaca come hierba.","vaca|La vaca da leche.",
+      "bicicleta|Voy al cole en bicicleta.","había|Había una vez un pirata.","nueve|Tengo nueve años.","herbívoro|La vaca es un animal herbívoro.","navegaban|Los barcos navegaban por el mar."],
+   f:["El bombero subió al árbol a buscar al gato.",
+      "En invierno el viento sopla muy fuerte.",
+      "Mi abuelo viajaba en barco y en avión.",
+      "Había una vaca que comía hierba en el valle.",
+      "Los piratas cantaban mientras navegaban."]},
+  {id:"cas-tildes", lang:"es", name:"Las tildes", sub:"agudas · llanas · esdrújulas", tip:"<b>Agudas</b> (fuerza al final) llevan tilde si acaban en vocal, n o s: canción, sofá. <b>Llanas</b> llevan tilde si NO acaban en vocal, n o s: árbol, lápiz. <b>Esdrújulas</b>, ¡siempre!: música, pájaro.",
+   w:["canción|Cantamos una canción.","camión|El camión es muy grande.","también|Yo también quiero jugar.","sofá|Me siento en el sofá.","después|Después del cole juego.",
+      "jamás|Un pirata jamás se rinde.","árbol|El pájaro está en el árbol.","lápiz|Escribo con un lápiz.","fácil|Este juego es fácil.","azúcar|El chocolate tiene azúcar.",
+      "difícil|Este reto es difícil.","música|Me gusta la música.","pájaro|El pájaro canta.","plátano|Me como un plátano.","teléfono|Suena el teléfono.",
+      "brújula|El capitán mira la brújula.","océano|El barco cruza el océano.","murciélago|El murciélago vuela de noche.","número|El número siete.","capitán|El capitán del barco."],
+   f:["Después de cenar escuchamos una canción en el sofá.",
+      "El pájaro está en el árbol, al lado del camión.",
+      "Me comí un plátano y un melón.",
+      "El capitán miró la brújula en medio del océano.",
+      "Ayer jugué al fútbol y marqué un gol."]},
+  {id:"cas-piratas", lang:"es", name:"Palabras piratas", sub:"H · LL/Y · G/J · C/Z", tip:"La <b>H</b> no suena pero se escribe: hoy, hundido, horizonte. Con <b>Z</b>: za, zo, zu (pez); con <b>C</b>: ce, ci (peces). ¡Una Z se convierte en C en el plural!",
+   w:["bandera|La bandera pirata es negra.","calavera|Una calavera en la bandera.","náufrago|El náufrago vive en una isla.","ancla|Echamos el ancla.","gaviota|La gaviota vuela sobre el mar.",
+      "timón|El capitán lleva el timón.","cañón|¡Fuego con el cañón!","catalejo|Mira por el catalejo.","hundido|Un barco hundido.","horizonte|Veo tierra en el horizonte.",
+      "joya|Una joya brillante.","tiburón|¡Cuidado con el tiburón!","llave|La llave del cofre.","playa|Llegamos a la playa.","pez|Un pez de colores.",
+      "peces|Muchos peces en el mar.","huella|Una huella en la arena.","hoy|Hoy zarpamos.","tesoro|Buscamos el tesoro.","geografía|Los piratas saben geografía."],
+   f:["El náufrago encontró una llave en la playa.",
+      "Hoy el capitán ha visto un tiburón con el catalejo.",
+      "La gaviota vuela sobre la bandera de la calavera.",
+      "Guardamos las joyas en un barco hundido."]},
+  {id:"cat-quixot", lang:"ca", name:"Dictat del Quixot", sub:"B i V · accents", tip:"Compte! En català els verbs en <b>-ava</b> van amb <b>V</b>: muntava, portava (en castellà és -aba amb B). <b>Cavall</b> i <b>vell</b> també van amb V.",
+   w:["vell|Un bací vell.","cavall|El cavall del Quixot.","muntava|Muntava el seu cavall.","portava|En Sancho portava un càntir.","pasturava|El moltó pasturava tranquil.",
+      "veure|Va veure un moltó.","càntir|Un càntir ple d'aigua.","velocitat|A tota velocitat.","set|Tenia molta set.","aigua|Un càntir ple d'aigua.",
+      "molí|Les aspes d'un molí.","galop|Va sortir al galop.","tranquil|El moltó estava tranquil.","mentre|Mentre muntava a cavall.","moltó|Va veure un moltó.",
+      "realitat|En realitat era un bací.","Quixot|Don Quixot de la Manxa.","aspes|Les aspes del molí.","bací|Un bací de barber.","elm|Es va posar l'elm."],
+   f:["Don Quixot es va posar l'elm, que en realitat era un bací vell.",
+      "Mentre muntava el seu cavall, va veure un moltó que pasturava tranquil.",
+      "En Sancho Panza portava un càntir ple d'aigua per calmar la set.",
+      "A tota velocitat, Don Quixot va sortir al galop cap a les aspes d'un molí."]},
+  {id:"cat-bv", lang:"ca", name:"La B i la V", sub:"-ava · mb · nv", tip:"Els verbs en <b>-ava</b> van amb <b>V</b> (cantava, jugava). Davant de <b>B</b> va <b>M</b> (bombolla) i davant de <b>V</b> va <b>N</b> (enviar). Compte: <b>avi</b> i <b>hivern</b> van amb V!",
+   w:["vaixell|El vaixell navega pel mar.","avi|El meu avi és molt savi.","àvia|La meva àvia fa pastissos.","treballava|El pirata treballava molt.","bufanda|A l'hivern porto bufanda.",
+      "hivern|A l'hivern fa fred.","núvol|Un núvol blanc.","vent|El vent bufa fort.","balena|La balena és enorme.","bombolla|Una bombolla de sabó.",
+      "cantava|L'ocell cantava.","jugava|El nen jugava al pati.","nevera|La llet és a la nevera.","bé|Molt bé!","vaca|La vaca menja herba.",
+      "volar|Els ocells saben volar.","bicicleta|Vaig a l'escola en bicicleta.","bolígraf|Escric amb bolígraf.","enviar|Vull enviar una carta.","bosc|Al bosc hi ha arbres."],
+   f:["A l'hivern el vent bufa fort i porto bufanda.",
+      "El meu avi treballava en un vaixell.",
+      "La balena nedava i feia bombolles.",
+      "Quan era petit jugava amb la bicicleta cada dia.",
+      "La vaca menjava herba al bosc."]},
+  {id:"cat-accents", lang:"ca", name:"Els accents", sub:"obert (è ò) · tancat (é ó)", tip:"La <b>a</b> sempre porta accent obert: <b>à</b>. La <b>i</b> i la <b>u</b> sempre tancat: <b>í ú</b>. La <b>e</b> i la <b>o</b> poden ser obertes (<b>è ò</b>: cafè, això) o tancades (<b>é ó</b>: també, cançó).",
+   w:["cafè|L'olor del cafè.","també|Jo també vull jugar.","perquè|Perquè m'agrada!","però|Vull sortir, però plou.","això|Què és això?",
+      "cançó|Cantem una cançó.","avió|L'avió vola alt.","camió|El camió és gran.","pastís|Un pastís de xocolata.","jardí|Hi ha flors al jardí.",
+      "dofí|El dofí salta.","sofà|Seiem al sofà.","català|Parlo català.","anglès|Aprenc anglès.","música|M'agrada la música.",
+      "pàgina|Obre el llibre a la pàgina deu.","plàtan|Em menjo un plàtan.","préssec|Un préssec dolç.","telèfon|Sona el telèfon.","brúixola|El pirata mira la brúixola."],
+   f:["El dofí salta al costat del vaixell.",
+      "Després de dinar em menjo un préssec i un plàtan.",
+      "Al jardí hi ha un camió de joguina.",
+      "Jo també canto una cançó en català i en anglès.",
+      "El capità mira la brúixola perquè vol trobar el tresor."]},
+  {id:"cat-sons", lang:"ca", name:"Sons difícils", sub:"ny · l·l · ix · tx · ç · tj", tip:"<b>ny</b>: muntanya. <b>l·l</b> porta punt volat: col·legi, pel·lícula (al teclat: <b>l.l</b> també val). <b>ix</b> després de vocal: peix, caixa. <b>tx</b>: cotxe. <b>ç</b> al final o davant a, o, u: braç, plaça.",
+   w:["muntanya|Pugem a la muntanya.","castanya|Una castanya calenta.","pinya|Una pinya del pi.","any|Fa un any.","col·legi|Vaig al col·legi.",
+      "il·lusió|Quina il·lusió!","pel·lícula|Mirem una pel·lícula.","tranquil·la|L'àvia està tranquil·la.","peix|Un peix de colors.","caixa|Una caixa de cartró.",
+      "xocolata|Un tros de xocolata.","cotxe|El cotxe és vermell.","dutxa|Em faig una dutxa.","plaça|Juguem a la plaça.","braç|Em fa mal el braç.",
+      "dolç|Un pastís dolç.","lluna|La lluna brilla.","platja|Anem a la platja.","maduixa|Una maduixa vermella.","setmana|La setmana que ve."],
+   f:["A la platja hem trobat una caixa plena de xocolata.",
+      "Al col·legi hem vist una pel·lícula de pirates.",
+      "La lluna brilla sobre la muntanya.",
+      "Al mercat de la plaça venen peix i maduixes.",
+      "Em faig una dutxa i menjo un pastís dolç."]},
+];
+const DICT_TXT = {
+  es: {word:"✍️ Escribe la palabra que oyes", sent:"✍️ Escribe la frase que oyes", ph:"Escribe aquí…", listen:"🔊 Escuchar", slow:"🐢 Despacio", parts:"✂️ A trozos",
+       reveal:"👀 Ver cómo se escribe", good:"✅ ¡La tenía bien!", bad:"❌ Me he equivocado", next:"Siguiente ▶", you:"Tú", fix:"Se escribe",
+       paper:"✏️ Escríbelo en tu libreta y luego mira si está bien.",
+       h:{caps:"¡Ojo con las mayúsculas!", acc:"¡Ojo con la tilde!", accMiss:"¡Te falta la tilde!", accExtra:"¡Esta no lleva tilde!", bv:"¡Ojo con la B y la V!", hh:"¡La H no suena, pero se escribe!",
+          lly:"¡Ojo con la LL y la Y!", gj:"¡Ojo con la G y la J!", cz:"¡Ojo con la C, la Z y la S!", rr:"¡Ojo con la R y la RR!", nn:"¡Ojo con la M y la N!", sp:"¡Ojo con los espacios!", gen:"¡Casi! Mira bien cómo se escribe."}},
+  ca: {word:"✍️ Escriu la paraula que sents", sent:"✍️ Escriu la frase que sents", ph:"Escriu aquí…", listen:"🔊 Escoltar", slow:"🐢 A poc a poc", parts:"✂️ A trossos",
+       reveal:"👀 Veure com s'escriu", good:"✅ L'he escrit bé!", bad:"❌ M'he equivocat", next:"Següent ▶", you:"Tu", fix:"S'escriu",
+       paper:"✏️ Escriu-ho a la llibreta i després mira si està bé.",
+       h:{caps:"Compte amb les majúscules!", acc:"Compte: accent obert o tancat?", accMiss:"Et falta l'accent!", accExtra:"Aquesta no porta accent!", bv:"Compte amb la B i la V!", hh:"La H no sona, però s'escriu!",
+          lly:"Compte amb la LL, la L·L i la Y!", gj:"Compte amb la G i la J!", cz:"Compte amb la C, la Ç, la S i la Z!", rr:"Compte amb la R i la RR!", nn:"Compte amb la M i la N!", sp:"Compte amb els espais!", gen:"Gairebé! Mira bé com s'escriu.", ny:"Compte amb la NY!", ix:"Compte amb la X, IX i TX!"}},
+};
 // Premios reales (los canjean papá o mamá con el código). r: 1 común · 2 raro · 3 épico
 const PRIZES = [
   {id:"capitulo", e:"🎬", n:"1 capítulo de One Piece",          r:1},
@@ -915,7 +1023,7 @@ const examKey = e => P.current === "p1" ? e.key : e.key + "-" + P.current;
 const blank = () => ({berries:0, games:0, totalOk:0, fixed:0, pieces:0,
   tickets:{earned:0, redeemed:[]}, prizes:[], chests:0, choices:0, streakGot:[], prizeOff:[], stars:{}, crono:{}, wins:{}, stats:{}, wrong:{},
   stickers:[], exams:{}, streak:{last:"", days:0}, lastIsland:"cat", sound:true, music:true, rank:0,
-  day:{d:"", chests:0}, locked:0, dailyMax:DAILY_CHESTS, examBest:{}, seenAt:{}, subStars:{}, rev:{}});
+  day:{d:"", chests:0}, locked:0, dailyMax:DAILY_CHESTS, examBest:{}, seenAt:{}, subStars:{}, rev:{}, dicStars:{}, lastDict:0, lastPart:"w"});
 let S = load();
 function load(){
   try { const d = JSON.parse(localStorage.getItem(stateKey(P.current)));
@@ -1017,7 +1125,7 @@ function go(t){ stopTimer(); G = null; screen = t; render(); window.scrollTo({to
 function render(){
   document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === screen));
   document.getElementById("tabs").style.display = (screen === "game" || screen === "who") ? "none" : "";
-  ({map:renderMap, island:renderIsland, exams:renderExams, game:renderGame, end:renderEnd,
+  ({map:renderMap, island:() => S.lastIsland === "dic" ? renderDictados() : renderIsland(), exams:renderExams, game:renderGame, end:renderEnd,
     treasure:renderTreasure, cine:renderCine, world:renderWorld, family:renderFamily, who:renderWho})[screen]();
 }
 function hud(){
@@ -1028,7 +1136,7 @@ function hud(){
 
 // ---------------- MAPA (dos mares) ----------------
 const SEAS = {
-  school: {title:"🏫 Mar de la Escuela", sub:"Lo que estudias en el cole y los exámenes de tus fichas", isl:[["cat",95,78],["cas",262,160],["med",95,262],["exam",262,350]]},
+  school: {title:"🏫 Mar de la Escuela", sub:"Lo que estudias en el cole y los exámenes de tus fichas", isl:[["cat",95,78],["cas",262,160],["med",95,262],["dic",262,350],["exam",95,440]]},
   bonus:  {title:"💎 Mar del Tesoro",    sub:"Retos extra para ganar MÁS recompensas: ¡berries x2!",    isl:[["mat",262,78],["gen",95,160],["eng",250,262]]},
 };
 function islandSVG(id,x,y){
@@ -1037,7 +1145,8 @@ function islandSVG(id,x,y){
   const emoji = isExam ? "🏰" : SUBJ[id].emoji;
   const color = isExam ? "#111" : SUBJ[id].color;
   const st = isExam ? Object.keys(S.exams).length : (S.stars[id]||0);
-  const marks = isExam ? `${st}/${EXAMS.length} hechos` : "★".repeat(st) + "☆".repeat(3-st);
+  const dicDone = DICT.filter(d => (S.dicStars[d.id+"-w"]||0) + (S.dicStars[d.id+"-f"]||0) >= 6).length;
+  const marks = isExam ? `${st}/${EXAMS.length} hechos` : id === "dic" ? `${dicDone}/${DICT.length} hechos` : "★".repeat(st) + "☆".repeat(3-st);
   return `<g class="isl" onclick="openIsland('${id}')" transform="translate(${x},${y})"><g class="islin">
     <ellipse rx="60" ry="18" cy="18" fill="#fff" opacity=".25"/>
     <ellipse rx="54" ry="22" cy="8" fill="#f3d9a0" stroke="#c9a15a" stroke-width="3"/>
@@ -1203,6 +1312,129 @@ function checkExams(){
   if (S.chests || S.choices) afterRewards([]);
 }
 
+// ---------------- ISLA DE LOS DICTADOS ----------------
+// Voz del móvil (speechSynthesis). Castellano con voz de España (distingue c/z) y catalán.
+let VOICES = [];
+function loadVoices(){ try { VOICES = speechSynthesis.getVoices() || []; } catch(e){} }
+if ("speechSynthesis" in window){ loadVoices(); try { speechSynthesis.addEventListener("voiceschanged", loadVoices); } catch(e){} }
+const LANG_TAG = {es:"es-ES", ca:"ca-ES"};
+function voiceFor(lg){
+  const vs = VOICES.filter(v => v.lang.toLowerCase().replace("_","-").startsWith(lg));
+  return vs.find(v => v.lang.replace("_","-") === LANG_TAG[lg] && v.localService) || vs.find(v => v.lang.replace("_","-") === LANG_TAG[lg]) || vs[0] || null;
+}
+const hasVoice = lg => !VOICES.length || !!voiceFor(lg);   // si aún no ha cargado la lista, no avisamos
+function speak(parts, lg){
+  if (!("speechSynthesis" in window)) return;
+  try { speechSynthesis.cancel(); } catch(e){}
+  const v = voiceFor(lg);
+  parts.forEach(([text, rate]) => { const u = new SpeechSynthesisUtterance(text); u.lang = LANG_TAG[lg]; if (v) u.voice = v; u.rate = rate; u.pitch = 1; speechSynthesis.speak(u); });
+}
+function unlockVoice(){ try { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); } catch(e){} }
+function stopVoice(){ try { speechSynthesis.cancel(); } catch(e){} }
+// kind: 0 normal · 1 despacio · 2 a trozos
+function sayQ(kind){
+  if (!G || !G.q || G.q.t !== "dict") return;
+  const q = G.q, lg = q.lang;
+  if (!q.long){
+    if (kind === 1) return speak([[q.a, .5], [q.a, .5]], lg);
+    return speak(q.c ? [[q.a, .8], [q.c, .9], [q.a, .8]] : [[q.a, .8], [q.a, .8]], lg);
+  }
+  if (kind === 1) return speak([[q.a, .5]], lg);
+  if (kind === 2){
+    let ch = q.a.split(/,\s*/);
+    if (ch.length < 2){ const w = q.a.split(" "), n = Math.ceil(w.length / Math.ceil(w.length/4)); ch = []; for (let i=0;i<w.length;i+=n) ch.push(w.slice(i,i+n).join(" ")); }
+    return speak(ch.map(c => [c, .65]), lg);
+  }
+  speak([[q.a, .8]], lg);
+}
+// Comparar: los acentos, las letras y (en frases) las mayúsculas cuentan; los signos de puntuación no.
+const dNorm = s => String(s).replace(/[’‘´`]/g, "'").replace(/l\s?[.•∙·]\s?l/gi, m => m[0] + "·" + m[m.length-1]).replace(/ŀl/g, "l·l")
+  .replace(/[.,;:!?¡¿"«»()…]/g, " ").replace(/\s+/g, " ").trim();
+function dictOk(input, ans, long){
+  const a = dNorm(ans), b = dNorm(input);
+  if (a === b) return true;
+  return !long && a === a.toLowerCase() && b.toLowerCase() === a;
+}
+// ¿Por qué ha fallado? (para el loro)
+function dictHint(input, ans, lg){
+  const H = DICT_TXT[lg].h, low = s => dNorm(s).toLowerCase(), a = low(ans), b = low(input);
+  if (a === b) return H.caps;
+  if (plain(a) === plain(b)){
+    const caps = plain(dNorm(ans)) !== plain(dNorm(input)) ? " " + H.caps : "";
+    if (/[àèéíòóúáñ]/.test(a) && plain(b) === b) return H.accMiss + caps;
+    if (plain(a) === a) return H.accExtra + caps;
+    return H.acc + caps;
+  }
+  const tests = [["bv", s => s.replace(/v/g, "b")], ["hh", s => s.replace(/h/g, "")], ["lly", s => s.replace(/l·l|ll|y|l/g, "L")], ["gj", s => s.replace(/g(?=[ei])|j/g, "J")],
+    ["cz", s => s.replace(/ç|z|c(?=[ei])|ss|s/g, "S")], ["rr", s => s.replace(/rr/g, "r")], ["nn", s => s.replace(/m(?=[bp])/g, "n")], ["sp", s => s.replace(/ /g, "")]];
+  if (lg === "ca") tests.push(["ny", s => s.replace(/ny|ñ|n/g, "N")], ["ix", s => s.replace(/tx|ix|ch|x/g, "X")]);
+  for (const [k, f] of tests){ if (f(plain(a)) === f(plain(b)) || f(a) === f(b)) return H[k]; }
+  return H.gen;
+}
+// Marca qué letras (o palabras) no coinciden, con la subsecuencia común más larga
+function lcsMarks(A, B){
+  const n = A.length, m = B.length, d = Array.from({length:n+1}, () => new Array(m+1).fill(0));
+  for (let i=n-1;i>=0;i--) for (let j=m-1;j>=0;j--) d[i][j] = A[i] === B[j] ? d[i+1][j+1] + 1 : Math.max(d[i+1][j], d[i][j+1]);
+  const okA = new Set(), okB = new Set(); let i = 0, j = 0;
+  while (i < n && j < m){ if (A[i] === B[j]){ okA.add(i); okB.add(j); i++; j++; } else if (d[i+1][j] >= d[i][j+1]) i++; else j++; }
+  return [okA, okB];
+}
+function dictCompare(input, ans, long){
+  const A = long ? dNorm(input).split(" ") : [...dNorm(input)], B = long ? dNorm(ans).split(" ") : [...dNorm(ans)];
+  const cmpA = long ? A : A.map(c => c.toLowerCase()), cmpB = long ? B : B.map(c => c.toLowerCase());
+  const [okA, okB] = lcsMarks(cmpA, cmpB), sep = long ? " " : "";
+  const mine = A.map((x,k) => okA.has(k) ? esc(x) : `<span class="x">${esc(x)}</span>`).join(sep) || "…";
+  const good = long ? esc(ans).split(" ").map((x,k) => okB.has(k) ? x : `<span class="m">${x}</span>`).join(" ")
+                    : B.map((x,k) => okB.has(k) ? esc(x) : `<span class="m">${esc(x)}</span>`).join("");
+  return [mine, good];
+}
+function dictList(d, part){
+  const base = {t:"dict", q:"Dictado", s:d.name, lang:d.lang, tip:d.tip};
+  if (part === "f") return d.f.map(a => Object.assign({}, base, {a, long:true}));
+  const all = d.w.map(x => { const [a, c] = x.split("|"); return Object.assign({}, base, {a, c}); });
+  return shuffle(freshest(all, "dic", 10));
+}
+function startDict(k, part){ S.lastDict = k; S.lastPart = part; save(); unlockVoice(); stopMusic(); startGame(part === "l" ? "libreta" : "dictado"); }
+function dictStars(key){ const st = S.dicStars[key]||0; return `<span class="dst">${"★".repeat(st)}${"☆".repeat(3-st)}</span>`; }
+function renderDictados(){
+  const nw = (S.wrong.dic||[]).length;
+  const noVoice = ["es","ca"].filter(lg => !hasVoice(lg));
+  const card = (d, k) => `<div class="dcard ${d.lang}">
+      <div class="spread"><b style="font-size:21px">${esc(d.name)}</b>${d.ficha ? `<span class="tag" style="font-size:12px">📄 De tu ficha · ${d.ficha}</span>` : ""}</div>
+      <div class="hint" style="margin:2px 0 6px">${esc(d.sub)}</div>
+      <div class="drow">
+        <button class="btn" onclick="startDict(${k},'w')">🔤 ${d.lang === "ca" ? "Paraules" : "Palabras"} ${dictStars(d.id + "-w")}</button>
+        <button class="btn blue" onclick="startDict(${k},'f')">📝 ${d.lang === "ca" ? "Frases" : "Frases"} ${dictStars(d.id + "-f")}</button>
+        <button class="btn ghost" onclick="startDict(${k},'l')">✏️ ${d.lang === "ca" ? "A la llibreta" : "En la libreta"}</button>
+      </div></div>`;
+  const list = lg => DICT.map((d,k) => d.lang === lg ? card(d,k) : "").join("");
+  app.innerHTML = `${hud()}
+    <div class="card">
+      <h2 style="margin:0;font-size:32px">✍️ Isla de los Dictados</h2>
+      <p style="margin:6px 0 0">El loro te dicta 🔊 y tú lo escribes. ¡Cuidado con la <b>B/V</b>, la <b>H</b> y las <b>tildes</b>!</p>
+      <p class="hint" style="margin:4px 0 0">🔤 Palabras: 10 palabras · 📝 Frases: el dictado entero · ✏️ Libreta: escribes en papel, como en clase.<br>⭐⭐⭐ en un dictado = 🧩 pieza de mapa.</p>
+      ${noVoice.length ? `<div class="dtip" style="margin-top:8px">⚠️ Este móvil no tiene voz en ${noVoice.map(l => l === "ca" ? "catalán" : "castellano").join(" ni en ")}. Para la familia: Ajustes › Accesibilidad › Contenido leído › Voces › ${noVoice.map(l => l === "ca" ? "Català" : "Español (España)").join(" / ")}.</div>` : ""}
+      <button class="btn block green" style="margin-top:10px" ${nw ? "" : "disabled"} onclick="unlockVoice();stopMusic();startGame('repaso')">🩹 Repaso de palabras falladas (${nw}) <small>Chopper te ayuda a curarlas</small></button>
+    </div>
+    <div class="card"><h3 style="margin:0 0 4px;font-size:24px">📘 Castellano</h3>${list("es")}</div>
+    <div class="card"><h3 style="margin:0 0 4px;font-size:24px">📕 Català</h3>${list("ca")}</div>
+    <button class="btn ghost" style="margin-top:16px" onclick="go('map')">◀ Volver al mapa</button>`;
+}
+// Cuerpo de la pregunta de dictado dentro del juego
+function dictBody(q){
+  const T = DICT_TXT[q.lang];
+  const ear = `<div class="dict-ear"><button class="btn" onclick="sayQ(0)">${T.listen}</button><button class="btn ghost" onclick="sayQ(1)">${T.slow}</button>${q.long ? `<button class="btn ghost" onclick="sayQ(2)">${T.parts}</button>` : ""}</div>`;
+  if (G.mode === "libreta"){
+    if (!G.reveal) return `${ear}<p class="hint center" style="font-size:17px">${T.paper}</p>
+      <div class="row" style="justify-content:center;margin-top:10px"><button class="btn gold" onclick="G.reveal=true;renderGame()">${T.reveal}</button></div>`;
+    return `${ear}<div class="dbig">${esc(q.a)}</div>
+      <div class="row" style="justify-content:center;margin-top:10px"><button class="btn green" onclick="answer(1)">${T.good}</button><button class="btn" onclick="answer(0)">${T.bad}</button></div>`;
+  }
+  const attrs = `id="dictIn" class="dict-in" lang="${q.lang}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="${T.ph}" oninput="dictTyped()" onkeydown="if(event.key==='Enter'){event.preventDefault();confirmAnswer()}"`;
+  return ear + (q.long ? `<textarea ${attrs} rows="3"></textarea>` : `<input ${attrs} type="text">`);
+}
+function dictTyped(){ const i = document.getElementById("dictIn"), b = document.getElementById("checkBtn"); if (i && b) b.disabled = !i.value.trim(); }
+
 // ---------------- JUEGO ----------------
 let timer = null;
 function stopTimer(){ if (timer){ clearInterval(timer); timer = null; } }
@@ -1240,6 +1472,7 @@ function startGame(mode){
   if (mode === "repaso") G.list = shuffle(S.wrong[id] || []).slice(0, 10);
   if (mode === "mundo"){ G.world = SUBW[id][S.lastWorld||0]; G.list = freshest(G.world.q, id, 10); G.list = shuffle(G.list); }
   if (mode === "granrepas") G.list = revList(id);
+  if (mode === "dictado" || mode === "libreta"){ G.dict = DICT[S.lastDict||0] || DICT[0]; G.part = mode === "libreta" ? "f" : S.lastPart; G.list = dictList(G.dict, G.part); }
   if (mode === "crono"){ G.end = Date.now() + 60000;
     timer = setInterval(() => { const left = Math.max(0, G.end - Date.now());
       const bar = document.getElementById("tbar"); if (bar) bar.style.width = (left/600)+"%";
@@ -1247,17 +1480,19 @@ function startGame(mode){
       if (!left){ stopTimer(); finish(); } }, 100);
   }
   nextQ(); screen = "game"; render(); window.scrollTo({top:0});
+  if (id === "dic") return;   // en los dictados habla el loro, sin campana
   mode === "batalla" ? sHorn() : sBell();
 }
 function nextQ(){
   const q = G.list ? G.list[G.i] : drawQ(G.id, true);
   G.q = q; G.built = [];
-  if (q.t === "order"){ let w; do { w = shuffle(q.w); } while (w.join() === q.w.join()); G.opts = w; }
+  if (q.t === "dict") G.opts = [];
+  else if (q.t === "order"){ let w; do { w = shuffle(q.w); } while (w.join() === q.w.join()); G.opts = w; }
   // las respuestas cambian de sitio (menos las listas fijas: tipos de oración, B/V, grupos…)
   else G.opts = q.o.length === 2 || FIXED_OPTS.some(f => f.join() === q.o.join()) ? q.o.slice() : shuffle(q.o);
   G.seen.push(q); if (G.seen.length > 30) G.seen.shift();
   (S.seenAt[G.id] = S.seenAt[G.id] || {})[qKey(q)] = Date.now();
-  G.locked = false; G.sel = null;
+  G.locked = false; G.sel = null; G.reveal = false; G.next = null;
 }
 function renderGame(){
   const s = SUBJ[G.id], q = G.q;
@@ -1274,13 +1509,13 @@ function renderGame(){
     </div>`;
   const vid = q.v ? `<a class="video" href="${q.v.url}" target="_blank" rel="noopener">▶ Ver «${esc(q.v.t)}» (en inglés, ~2 min)</a>` : "";
   const long = G.opts.some(o => o.length > 16);
-  const body = q.t === "order"
+  const body = q.t === "dict" ? dictBody(q) : q.t === "order"
     ? `<div class="chips">${G.opts.map((w,k) => `<button class="wchip ${G.built.includes(k)?"used":""}" onclick="tapWord(${k})">${esc(w)}</button>`).join("")}</div>
        <div class="slots" id="slots">${G.built.length ? G.built.map((k,n) => `<span class="slot" onclick="untap(${n})">${esc(G.opts[k])}</span>`).join("") : `<span class="hint">Toca las palabras en orden…</span>`}</div>`
     : `<div class="opts ${long?"one":""}">${G.opts.map((o,k) => `<button class="opt ${G.sel===k?"sel":""}" onclick="choose(${k})">${esc(o)}</button>`).join("")}</div>`;
   // En contrarreloj se responde al momento; en el resto se elige y se pulsa Comprobar (se puede cambiar antes)
   const ready = q.t === "order" ? G.built.length === G.opts.length : G.sel != null;
-  const check = G.mode === "crono" ? "" : `<div class="row" style="justify-content:center;margin-top:14px">
+  const check = G.mode === "crono" || G.mode === "libreta" ? "" : `<div class="row" style="justify-content:center;margin-top:14px">
       ${q.t === "order" ? `<button class="btn ghost" ${G.built.length?"":"disabled"} onclick="clearWords()">↩ Borrar</button>` : ""}
       <button class="btn green" id="checkBtn" ${ready?"":"disabled"} onclick="confirmAnswer()">✔ Comprobar</button></div>`;
   app.innerHTML = `
@@ -1288,17 +1523,19 @@ function renderGame(){
     ${SUBJ[G.id].zone === "bonus" ? `<div class="x2">💎 Mar del Tesoro: ¡berries x2!</div>` : ""}
     ${arena}
     <div class="card">
-      <span class="tag">${s.emoji} ${esc(s.short)} · ${({aventura:"Aventura",crono:"Contrarreloj",batalla:"Batalla",repaso:"Repaso",mundo:G.world && G.world.n,granrepas:"Gran Repàs"})[G.mode]}</span>
-      <div class="q-title">${esc(q.q)}</div>
-      ${q.s ? `<div class="q-sentence">${esc(q.s)}</div>` : ""}
+      <span class="tag">${s.emoji} ${esc(s.short)} · ${({aventura:"Aventura",crono:"Contrarreloj",batalla:"Batalla",repaso:"Repaso",mundo:G.world && G.world.n,granrepas:"Gran Repàs",dictado:G.dict && G.dict.name,libreta:"✏️ " + (G.dict && G.dict.name)})[G.mode]}</span>
+      <div class="q-title">${q.t === "dict" ? DICT_TXT[q.lang][q.long ? "sent" : "word"] : esc(q.q)}</div>
+      ${q.s && q.t !== "dict" ? `<div class="q-sentence">${esc(q.s)}</div>` : ""}
       ${vid}
       ${body}
       ${check}
       <div class="feedback" id="fb"></div>
     </div>
     <div class="parrot"><div class="bird">${icon("parrot",62,62)}</div><div class="bubble" id="say">${esc(G.say || sayStart())}</div>${G.combo>=2?`<div class="combo">🔥 x${G.combo}</div>`:""}</div>`;
+  // el loro dicta solo al llegar a cada palabra o frase
+  if (q.t === "dict" && G.spoken !== G.i){ G.spoken = G.i; setTimeout(() => sayQ(0), G.i ? 350 : 700); }
 }
-function quitGame(){ if (G && (G.ok + G.ko) > 0 && !confirm("¿Salir de la partida? No contará.")) return; stopTimer(); screen = G && G.mode === "mundo" ? "world" : "island"; G = null; render(); }
+function quitGame(){ if (G && (G.ok + G.ko) > 0 && !confirm("¿Salir de la partida? No contará.")) return; stopTimer(); if (G && G.id === "dic"){ stopVoice(); startMusic(); } screen = G && G.mode === "mundo" ? "world" : "island"; G = null; render(); }
 
 function wrongKey(q){ return q.q + "|" + (q.s||"") + "|" + q.a; }
 function tapWord(k){
@@ -1316,21 +1553,24 @@ function choose(k){
 }
 function confirmAnswer(){
   if (!G || G.locked) return;
-  if (G.q.t === "order"){ if (G.built.length === G.opts.length) answer(-1); }
+  if (G.q.t === "dict"){ const i = document.getElementById("dictIn"); if (!i || !i.value.trim()) return; i.blur(); answer(-1); }
+  else if (G.q.t === "order"){ if (G.built.length === G.opts.length) answer(-1); }
   else if (G.sel != null) answer(G.sel);
   const cb = document.getElementById("checkBtn"); if (cb) cb.disabled = true;
 }
 function untap(n){ if (!G || G.locked) return; G.built.splice(n,1); renderGame(); }
 const SAY_OK = ["¡Croac! ¡Eso es!","¡Qué crack, capitán!","¡Toma ya! 💥","¡Berries para el capitán!","¡Ni Zoro se pierde tan poco!","¡Eres un genio pirata!"];
 const SAY_KO = ["¡Ups! Mira la buena 👀","¡No pasa nada, otra!","Hasta Luffy se equivoca 😅","¡Ánimo, capitán!"];
-function sayStart(){ return [`¡Vamos, ${me().name}! ¡Tú puedes!`,"¡Leva anclas! ⚓","Lee con calma, pirata 🦜"][G.i % 3]; }
+function sayStart(){ if (G.id === "dic") return (G.q && G.q.lang === "ca" ? [`Escolta bé, ${me().name}! 👂`, "Escolta, escriu i comprova 🦜", "Compte amb els accents! ✍️"] : [`¡Escucha bien, ${me().name}! 👂`, "Escucha, escribe y comprueba 🦜", "¡Ojo con las tildes! ✍️"])[G.i % 3]; return [`¡Vamos, ${me().name}! ¡Tú puedes!`,"¡Leva anclas! ⚓","Lee con calma, pirata 🦜"][G.i % 3]; }
 function answer(k){
   if (!G || G.locked) return; G.locked = true;
-  const q = G.q, isOrder = q.t === "order";
-  const pick = isOrder ? G.built.map(j => G.opts[j]).join(" ") : G.opts[k];
+  const q = G.q, isOrder = q.t === "order", isDict = q.t === "dict";
+  const pick = isDict ? (G.mode === "libreta" ? "" : document.getElementById("dictIn").value) : isOrder ? G.built.map(j => G.opts[j]).join(" ") : G.opts[k];
   if (isOrder) q.a = q.w.join(" ");
-  const ok = pick === q.a;
-  if (isOrder){ const sl = document.getElementById("slots"); sl.classList.add(ok ? "good" : "bad");
+  const ok = isDict ? (G.mode === "libreta" ? k === 1 : dictOk(pick, q.a, q.long)) : pick === q.a;
+  stopVoice();
+  if (isDict){ const i = document.getElementById("dictIn"); if (i){ i.classList.add(ok ? "good" : "bad"); i.readOnly = true; } }
+  else if (isOrder){ const sl = document.getElementById("slots"); sl.classList.add(ok ? "good" : "bad");
     if (!ok) sl.insertAdjacentHTML("afterend", `<div class="q-sentence" style="font-size:18px">✔ ${esc(q.a)}</div>`); }
   else { const btns = app.querySelectorAll(".opt");
     btns[k].classList.add(ok ? "ok" : "ko");
@@ -1350,8 +1590,16 @@ function answer(k){
   } else {
     G.ko++; st.ko++; sKo();
     st.miss = st.miss || {}; st.miss[key] = (st.miss[key]||0) + 1;
-    if (G.id !== "mat" || wl.length < 30){ if (!wl.some(x => wrongKey(x) === key)) wl.push(q.t === "order" ? {t:"order", q:q.q, w:q.w} : {q:q.q, s:q.s, o:q.o, a:q.a, v:q.v}); }
+    if (G.id !== "mat" || wl.length < 30){ if (!wl.some(x => wrongKey(x) === key)) wl.push(isDict ? {t:"dict", q:q.q, s:q.s, a:q.a, c:q.c, long:q.long, lang:q.lang, tip:q.tip} : q.t === "order" ? {t:"order", q:q.q, w:q.w} : {q:q.q, s:q.s, o:q.o, a:q.a, v:q.v}); }
     fb.className = "feedback ko"; fb.textContent = "¡Casi! La buena era: " + q.a;
+    if (isDict){ const T = DICT_TXT[q.lang];
+      if (G.mode === "libreta") fb.innerHTML = `<div class="dtip">📖 ${q.tip}</div>`;
+      else { const [mine, good] = dictCompare(pick, q.a, q.long);
+        G.say = dictHint(pick, q.a, q.lang);
+        if (say) say.textContent = G.say;
+        fb.innerHTML = `<div style="font-size:19px">${esc(G.say)}</div><div class="dcmp"><small>${T.you}:</small> ${mine}<br><small>✔ ${T.fix}:</small> <b>${good}</b></div><div class="dtip">📖 ${q.tip}</div>`; }
+      fb.insertAdjacentHTML("beforeend", `<button class="btn" style="margin-top:10px" onclick="G && G.next && G.next()">${T.next}</button>`);
+      setTimeout(() => speak([[q.a, .8]], q.lang), 500); }
     app.querySelector(".card").classList.add("shake");
   }
   save();
@@ -1363,14 +1611,19 @@ function answer(k){
     else { G.lives--; me.classList.add("hurt"); setTimeout(sSplash, 150); }
     wait = ok ? 1100 : 1900;
   }
-  setTimeout(() => {
+  const advance = () => {
     if (!G) return;
+    G.next = null;
     if (G.mode === "crono" && Date.now() >= G.end) return;
     if (G.mode === "batalla" && (G.boss <= 0 || G.lives <= 0)) return finish();
     G.i++;
     if (G.list && G.i >= G.list.length) return finish();
     G.say = null; nextQ(); renderGame();
-  }, wait);
+  };
+  // en un dictado fallado se queda quieto hasta que pulse «Siguiente», para que lo pueda leer con calma
+  if (isDict && !ok){ G.next = advance; return; }
+  if (isDict) wait = 1000;
+  setTimeout(advance, wait);
 }
 
 function finish(){
@@ -1407,6 +1660,15 @@ function finish(){
       else { r.due = addDays(REV_DAYS[r.lvl]); msgs.push(`🌳 ¡Gran Repàs superado! +40 M. El próximo será el ${fmtDay(r.due)} (en ${REV_DAYS[r.lvl]} días).`); } }
     else msgs.push(`Necesitas ${REV_PASS} aciertos. Mira los errores en 🩹 Repaso de errores y vuelve a intentarlo.`);
   }
+  if (G.mode === "dictado"){
+    const n = G.list.length, stars = G.ok >= n-1 ? 3 : G.ok >= n*.7 ? 2 : G.ok >= n/2 ? 1 : 0, key = G.dict.id + "-" + G.part;
+    G.stars = stars; good = stars >= 2;
+    if (stars > (S.dicStars[key]||0)){ S.dicStars[key] = stars; msgs.push(`¡Nuevo récord en ${G.dict.name} (${G.part === "f" ? "frases" : "palabras"}): ${"⭐".repeat(stars)}!`); }
+    S.stars.dic = Math.max(S.stars.dic||0, stars);
+    if (stars === 3) piece++;
+  }
+  if (G.mode === "libreta"){ good = G.ok >= G.ko; msgs.push("✏️ ¡Dictado en la libreta hecho! Enséñaselo a papá o a mamá."); }
+  if (G.id === "dic"){ stopVoice(); startMusic(); }
   if (G.mode === "repaso"){ good = G.ok >= G.ko; if (!(S.wrong[id]||[]).length) msgs.push("¡Chopper ha curado todos tus errores de esta isla! 🩺"); }
   newDay();
   // con la bodega llena (cofres de hoy + el de mañana) ya no se ganan piezas hasta el día siguiente
@@ -1442,6 +1704,8 @@ function renderEnd(){
   if (G.mode === "batalla"){ title = G.won ? "¡VICTORIA!" : "¡Retirada!"; big = G.won ? `<div class="spin-in">${icon("jolly",120,120)}</div>` : `<div><svg width="110" height="110" style="color:${s.bossColor}"><use href="#monster"/></svg></div><b>${esc(s.boss)} ha ganado esta vez. ¡Revancha!</b>`; }
   if (G.mode === "mundo"){ title = ["¡Repasa el 📖 Aprèn!","¡Bien hecho!","¡Muy bien!","¡PERFECTO!"][G.stars]; big = `<div style="font-size:30px">${G.world.e}</div><div style="font-size:54px">${"⭐".repeat(G.stars)}${"☆".repeat(3-G.stars)}</div><b>${G.ok} de ${G.list.length} correctas</b>`; }
   if (G.mode === "granrepas"){ title = G.pass ? "¡GRAN REPÀS SUPERADO!" : "¡Casi!"; big = `<div style="font-size:60px">${G.pass ? "🌳" : "🌱"}</div><b>${G.ok} de ${G.list.length} correctas</b>`; }
+  if (G.mode === "dictado"){ title = ["¡Escucha otra vez y repite!","¡Bien hecho!","¡Muy bien!","¡PERFECTO!"][G.stars]; big = `<div style="font-size:40px">✍️</div><div style="font-size:54px">${"⭐".repeat(G.stars)}${"☆".repeat(3-G.stars)}</div><b>${G.ok} de ${G.list.length} bien escritas</b>`; }
+  if (G.mode === "libreta"){ title = "¡Dictado terminado!"; big = `<div style="font-size:54px">✏️</div><b>${G.ok} de ${G.list.length} bien en la libreta</b>`; }
   if (G.mode === "repaso"){ title = "¡Repaso hecho!"; big = `<b>${G.ok} curadas · ${G.ko} por repasar</b>`; }
   app.innerHTML = `
     <div class="card center pop">
@@ -1451,7 +1715,7 @@ function renderEnd(){
       ${G.msgs.map(m => `<p style="font-weight:800;margin:6px 0">${m}</p>`).join("")}
       <p class="pieces">${"🧩".repeat(S.pieces)}${"▫️".repeat(PIECES_PER_TICKET - S.pieces)}</p>
       <div class="row" style="justify-content:center">
-        ${G.mode === "granrepas" && G.pass ? "" : `<button class="btn" onclick="startGame('${G.mode === "repaso" && !(S.wrong[G.id]||[]).length ? "aventura" : G.mode}')">Otra vez 🔁</button>`}
+        ${G.mode === "granrepas" && G.pass ? "" : `${G.mode === "repaso" && G.id === "dic" && !(S.wrong.dic||[]).length ? "" : `<button class="btn" onclick="${G.id === "dic" ? "unlockVoice();stopMusic();" : ""}startGame('${G.mode === "repaso" && !(S.wrong[G.id]||[]).length ? "aventura" : G.mode}')">Otra vez 🔁</button>`}`}
         ${G.mode === "mundo" ? `<button class="btn ghost" onclick="go('world')">📖 Al submundo</button>` : ""}
         <button class="btn ghost" onclick="screen='island';render()">A la isla</button>
       </div>
